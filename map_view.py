@@ -9,7 +9,6 @@ COLORS = {
     "Lounge": "#d8c3f0", "Lab": "#a8dadc", "MeetingRoom": "#ffc8dd",
     "Office": "#cde7b0", "Utility": "#dddddd",
 }
-CORRIDOR = "#fff3c4"
 
 
 def add_polygon(ax, polygon, **style):
@@ -25,17 +24,14 @@ def draw_floor(ax, floor, rooms, walkable):
     outline = building(floor)
     add_polygon(ax, outline, facecolor="white", edgecolor="black", linewidth=2, zorder=1)
 
+    # Corridors and lobbies stay white (the floor). Only open patches that belong
+    # to an L-shaped room are drawn, in that room's colour.
     room_type = {r["room_id"]: r["type"] for r in rooms}
     for area in walkable:
-        owner = area["part_of"]          # open patch of an L-shaped room
-        add_polygon(ax, area["polygon"],
-                    facecolor=COLORS.get(room_type.get(owner), CORRIDOR),
-                    edgecolor="#555555" if owner else "#e0c870",
-                    linewidth=0.8 if owner else 0.5, zorder=2)
-        if not owner and area["polygon"].area >= 10:
-            ax.text(area["polygon"].centroid.x, area["polygon"].centroid.y,
-                    "lobi / koridor", ha="center", va="center", fontsize=6,
-                    style="italic", color="#8a6d00", zorder=5)
+        owner = area["part_of"]
+        if owner:
+            add_polygon(ax, area["polygon"], facecolor=COLORS.get(room_type.get(owner), "#eeeeee"),
+                        edgecolor="#555555", linewidth=0.8, zorder=2)
 
     patches = {}
     for room in rooms:
