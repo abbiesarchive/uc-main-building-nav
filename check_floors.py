@@ -127,6 +127,9 @@ def check_link_back(floor, room_id, room, direction, target):
 
 def main(wanted):
     floors = wanted or list(load_all())
+    if not floors:
+        print("ERROR: no floor files found in floors/ (add floors/lantai2.py and its csv)")
+        return 1
     failed = False
     for floor in floors:
         errors, warnings = check_floor(floor)

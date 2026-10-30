@@ -1,0 +1,40 @@
+floor,room_id,name,type,xmin,ymin,xmax,ymax
+2,02001,Lift Barat Lt 2,Lift,46.1,52.2,49.1,57.8
+2,02002,Lift Timur Lt 2,Lift,54.1,49.6,57.1,57.8
+2,02003,Tangga Barat Lt 2,Stairs,0,49.6,3,60
+2,02004,Tangga Utara Lt 2,Stairs,57.1,49.6,60.7,57.8
+2,02005,Tangga Timur Lt 2,Stairs,96.2,49.6,99.45,56.8
+2,02006,Tangga Tengah Barat Lt 2,Stairs,36.7,44.8,41.6,49.6
+2,02007,Tangga Tengah Timur Lt 2,Stairs,59,45,65,47.5
+2,02008,Tangga Tengah Timur Pendek Lt 2,Stairs,59,47.5,60.7,49.6
+2,002001,Toilet Wanita Lt 2,Toilet,39.4,56,46.1,60
+2,002002,Toilet Pria Lt 2,Toilet,39.4,49.6,46.1,56
+2,0002001,Pantry Lt 2,Pantry,57.1,57.8,60.7,60
+2,222,Area Koleksi Perpustakaan,Library,3,49.6,25.6,60
+2,222001,Ruang Pengolahan (222A),Library,25.6,56.1,28.9,60
+2,222002,Ruang Audio Visual (222B),Library,25.6,49.6,28.9,56.1
+2,221,Life Action Laboratory (221),Lab,28.9,49.6,39.4,60
+2,223,Entrepreneurship Corner (223),Library,0,40,9.7,49.6
+2,224,Counter Pelayanan Perpustakaan (224),Library,9.7,43.4,13.6,49.6
+2,225001,Collaboration Room (225A),MeetingRoom,9.7,40,15.1,43.4
+2,225002,Ruang 225B,MeetingRoom,15.1,40,16.6,43.4
+2,225003,Ruang 225C,MeetingRoom,16.6,40,18.1,43.4
+2,225004,Ruang 225D,MeetingRoom,18.1,40,19.3,43.4
+2,225,Lounge Perpustakaan (225),Lounge,13.6,43.4,29.6,49.6
+2,226,Student Lounge (226),Lounge,29.6,40,36.7,47.9
+2,226001,Command Centre (226A),Office,36.7,40,39.7,44.8
+2,226002,Ruang Laktasi (226B),Office,35.6,47.9,36.7,49.6
+2,201003,Tax Center (201C),Office,60.7,55.7,65,60
+2,201002,Ruang SRB (201B),Office,60.7,52.7,65,55.7
+2,201001,Ruang SC (201A),Office,60.7,49.6,65,52.7
+2,201,Ruang Meeting (201),MeetingRoom,60.7,47.5,65,49.6
+2,202,Student Lounge (202),Lounge,65,49.6,82.2,60
+2,203,BAA (203),Office,82.2,49.6,92.3,57.6
+2,203001,Ruang Produksi (203A),Office,89.5,57.6,92.3,60
+2,203002,Ruang Arsip BAA (203B),Storage,92.3,49.6,96.2,60
+2,204,Gudang MNA (204),Storage,96.1,40,99.45,47.5
+2,205,MNA (205),Office,78.8,40,96.1,47.5
+2,206,Ruang Konseling BMA (206),Office,69.1,45,74.3,47.5
+2,207,BMA (207),Office,63.8,40,78.8,45
+2,208,Gudang BMA (208),Storage,60.8,40,63.8,45
+2,209,Ruang M/E (209),Utility,96.2,56.8,99.45,60
