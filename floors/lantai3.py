@@ -1,0 +1,32 @@
+"""Lt. 3 settings. Units are meters. Coordinate system: see README.md.
+Sizes are estimates, about +/- 0.5 m."""
+
+FLOOR = "3"
+LEVEL = 3
+ROOMS_CSV = "csv/lantai3.csv"
+
+# Area yang bisa dilewati 
+OUTLINE = [
+    (0, 47.62, 96, 50),
+    (0, 40, 96, 60),      
+    (40, 0, 60, 40),      
+]
+
+# Titik awal user 
+START = (50, 55)
+
+# Lift dan tangga pada Lantai 3.
+LINKS = {
+    "03001": {"up": "4", "down": "2", "cost": 10},  # Lift Barat
+    "03002": {"up": "4", "down": "2", "cost": 10},  # Lift Timur
+    "03003": {"up": "4", "down": "2", "cost": 20},  # Tangga Barat
+    "03004": {"up": "4", "down": "2", "cost": 20},  # Tangga Utara
+    "03005": {"up": "4", "down": "2", "cost": 20},  # Tangga Timur
+    "03006": {"up": "4", "down": "2", "cost": 20},  # Tangga Selatan
+}
+
+# Gambar denah untuk overlay.
+IMAGE = "denah/lantai3.jpeg"
+
+# Kalibrasi gambar (sementara mengikuti sistem koordinat yang sama).
+CALIBRATION = (80, 175)
