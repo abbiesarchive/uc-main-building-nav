@@ -1,0 +1,25 @@
+floor,room_id,name,type,xmin,ymin,xmax,ymax
+2A,230,Lab IKM-FK (230),Lab,3,49.6,10,60
+2A,229,Kelas 229,Classroom,10,49.6,20,60
+2A,228,Kelas 228,Classroom,20,49.6,30,60
+2A,227,Kelas 227,Classroom,30,49.6,39.4,60
+2A,232,UC Online (232),Office,0,40,20,46.5
+2A,234001,"ICE, IPC (234A)",Office,20,40,30,46.5
+2A,234002,"ARD, SW (234B)",Office,30,40,33.3,44.5
+2A,210211,Meeting Room 210-211,MeetingRoom,60.7,49.6,78.8,60
+2A,212003,Ruang Rector (212C),Office,78.8,56.7,83.7,60
+2A,212004,Ruang Vice 3 (212D),Office,83.7,56.7,88.5,60
+2A,214002,Ruang BOD (214B),Office,88.5,56.7,94.4,60
+2A,212002,Ruang Vice 2 (212B),Office,78.8,53.1,82.7,56.7
+2A,212001,Ruang Vice 1 (212A),Office,78.8,49.6,82.7,53.1
+2A,212,Ruang Directors (212),Office,82.7,54.8,90.4,56.7
+2A,213,Meeting Room 213,MeetingRoom,84.9,49.6,89.2,54.8
+2A,214001,Ruang EBO (214A),Office,90.4,53.1,94.4,56.7
+2A,214,Ruang EBO (214),Office,89.2,49.6,94.4,53.1
+2A,214003,Gudang HCM (214C),Storage,94.4,49.6,95.7,60
+2A,220,Multimedia Room (220),Office,60.3,40,65.65,44.6
+2A,219,LSP (219),Office,65.65,40,70.1,44.6
+2A,217218,QA (217-218),Office,70.1,40,83.8,44.3
+2A,LOBBY2A,Lobby Lt 2A,Lounge,75.7,44.3,83.7,49.6
+2A,216,University Office (216),Office,83.8,40,88.6,46.4
+2A,215,HCM (215),Office,88.6,40,99.2,46.5

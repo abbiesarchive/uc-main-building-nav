@@ -2,7 +2,7 @@
 Adding a floor means adding a file here. Nothing else is edited.
 
 A floor file must define: FLOOR, LEVEL, ROOMS_CSV, OUTLINE, START.
-It may define: VOIDS, PART_OF, LINKS, IMAGE, CALIBRATION. See README.md.
+It may define: VOIDS, PART_OF, LINKS, SHARED, IMAGE, CALIBRATION. See README.md.
 """
 import importlib
 import pkgutil
@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent   # the project folder
 
 REQUIRED = ["FLOOR", "LEVEL", "ROOMS_CSV", "OUTLINE", "START"]
-OPTIONAL = {"VOIDS": [], "PART_OF": {}, "LINKS": {}, "IMAGE": None, "CALIBRATION": None}
+OPTIONAL = {"VOIDS": [], "PART_OF": {}, "LINKS": {}, "SHARED": {}, "IMAGE": None, "CALIBRATION": None}
 
 
 @lru_cache
