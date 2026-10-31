@@ -1,0 +1,41 @@
+﻿4,04001,Lift Barat Lt 4,Lift,45.62,51.81,48.55,57.82
+4,04002,Lift Timur Lt 4,Lift,53.67,50,56.66,57.82
+4,04003,Tangga Barat Lt 4,Stairs,0,50,3.48,60
+4,04004,Tangga Utara Lt 4,Stairs,56.66,50,59.88,60
+4,04005,Tangga Timur Lt 4,Stairs,93,50,96,60
+4,04006,Tangga Selatan Lt 4,Stairs,53.85,0,60,3.48
+4,004001,Toilet Wanita Lt 4,Toilet,36,55.5,45.62,60
+4,004002,Toilet Pria Lt 4,Toilet,36,51,45.62,55.5
+4,004003,Toilet VIP Lt 4,Toilet,40.81,50,45.62,51
+4,004004,Toilet Disable Lt 4,Toilet,36,50,40.81,51
+4,0004001,Pantry Lt 4,Pantry,53.67,57.82,56.66,60
+4,419002,Ruang Penyimpanan 419,Storage,17,50,20,53.25
+4,409001,Pantry & Gudang Finance Accounting ,Storage,67,55,76,60
+4,409,Pantry & Gudang Property Management,Storage,67,50,76,55
+4,424,Storage Alat FTP (424),Storage,19.7,40,25.7,47.62
+4,405001,Kelas/LCC 405A,Classroom,40,25,50,30
+4,405002,Kelas/LCC 405B,Classroom,40,20,50,25
+4,423,Kelas 423,Classroom,10,40,19.7,47.62
+4,422,Kelas 422,Classroom,0,40,10,47.62
+4,418,Ruang Steril (418),Lab,17,57,20,60
+4,419001,Ruang Laboran (419A),Lab,17,53.25,20,57
+4,421,Lab Sensori & Pengolahan Pangan (421),Lab,3.48,50,7,60
+4,420,Lab Mikrobiologi Pangan (420),Lab,7,50,17,60
+4,417,Lab Kimia & Biokimia Pangan (417),Lab,20,50,36,60
+4,404,Lab HTEB (404),Lab,40,0,50,20
+4,406,Moot Court Lab (406),Lab,40,30,50,40
+4,413,Ruang Dosen CBz (413),LecturerRoom,68,40,87,47.62
+4,414,Ruang Kapodi CB & HTEB (414),LecturerRoom,65,40,68,47.62
+4,415,Ruang Kapodi CB & HTEB (415),LecturerRoom,62.5,40,65,47.62
+4,416,Ruang Kapodi CB & HTEB (416),LecturerRoom,60,40,62.5,47.62
+4,402,Ruang Dosen HTEB (402),LecturerRoom,53.85,24.52,60,40
+4,425001,Ruang Dekan FTP (425A),LecturerRoom,42,40,46,47.62
+4,425002,Ruang kaprodi FTP (425B),LecturerRoom,37.07,40,42,47.62
+4,425003,Ruang Dosen FTP 425,LecturerRoom,25.7,40,37.07,47.62
+4,408,Finance & Accounting (FA),Office,59.88,50,67,60
+4,410,Property Management (PM),Office,76,50,86,60
+4,411,Information & Communication Technology (411),Office,86,50,93,60
+4,412,Information & Communication Technology (412),Office,87,40,96,47.62
+4,401,Academic Support CB&HTEB&FTP,Office,53.85,40,60,47.62
+4,403,School of Entrepreneurship & Humanities 403 (SEH),Office,53.85,3.48,60,24.52
+4,407,SEH Mentoring & Faculty Lounge (407),MeetingRoom,46,40,50,47.62
