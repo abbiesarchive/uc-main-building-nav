@@ -28,16 +28,12 @@ pip install -r requirements.txt
 
 ## Run
 
-```
-python app.py              walk around (opens a window)
-python app.py 3            start on Lt. 3
-python check_floors.py     check all floors  (run this before every commit)
-python plot_floor.py 2     draw floor 2 and check it (add "overlay" to lay it on the plan image)
-python make_walkable.py 2  list the corridors of floor 2
-python draw_map.py 2       picture with a user, buffer and route
+```bash
+streamlit run web_app.py   # Run web app navigation
+python check_floors.py     # Check all floors data integrity
 ```
 
-Keys in the app: W A S D or arrows walk 1 m, E / Q go up / down in a stair or lift,
+Keys in the web app: W A S D or arrows walk 2 m, E / Q go up / down in a stair or lift,
 + / - change the buffer, R restarts.
 
 ## Adding your floor (you only add files)
@@ -46,40 +42,29 @@ Say you do Lt. 3:
 
 1. Copy `csv/lantai2.csv` to `csv/lantai3.csv`, delete the rows, fill in your rooms.
    Columns: `floor, room_id, name, type, xmin, ymin, xmax, ymax`.
-   Keep `floor` and `room_id` as **text** (`"2A"`, `02001`). ID rules are in `CLAUDE.md`.
+   Keep `floor` and `room_id` as **text** (`"2A"`, `02001`).
 2. Copy `floors/lantai2.py` to `floors/lantai3.py` and change: `FLOOR`, `LEVEL`,
    `ROOMS_CSV`, `OUTLINE` (Lt. 3 is a T: add the stem rectangle), `VOIDS`, `START`,
-   `LINKS`, and `IMAGE` / `CALIBRATION` if you want the overlay.
+   and `LINKS`.
 3. `LINKS` says where each stair and lift on your floor leads, for example
-   `"03003": {"up": "4", "down": "2A", "cost": 8}`. The other floor's file must have the
+   `"03003": {"up": "4", "down": "2", "cost": 8}`. The other floor's file must have the
    stair going back. `check_floors.py` tests that.
-4. Run `python check_floors.py` and fix every error, then `python plot_floor.py 3 overlay`
-   and look at the picture, then `python app.py 3` and walk your floor.
+4. Run `python check_floors.py` and fix every error, then run `streamlit run web_app.py`
+   and walk your floor.
 5. Commit **only** your own files: `csv/lantai3.csv` and `floors/lantai3.py`. The app
    loads every file in `floors/` by itself, so nobody edits a shared list.
-
-## What goes in git
-
-- Committed: the code, `csv/lantai*.csv`, `floors/*.py`, `CLAUDE.md`, this README.
-- Not committed (see `.gitignore`): `.venv`, pictures like `floor_2_overlay.png`, and
-  `csv/walkable_*.csv`. The corridors are rebuilt from the room CSV every time the app
-  starts, so there is no generated file to conflict on.
-- **The CSV files are the database.** `load_db.py` (not written yet) will build
-  `campus.db` from them for the AI course. The `.db` file is a generated copy and is not
-  committed, because git cannot merge it. The edit view will save back to the CSV.
 
 ## Files
 
 | File | Job |
 |---|---|
-| `floors/` | one settings file per floor (outline, voids, start, stair links) |
-| `csv/` | one room table per floor |
-| `map_data.py` | CSV to polygons, corridors, "can I stand here?" |
-| `gis_ops.py` | Buffer and Spatial Join |
-| `movement.py` | walking rules, changing floors, what is near you |
-| `map_view.py` | draws a floor |
-| `app.py` | the window and the keys |
-| `check_floors.py` | the checks |
-| `pathfinding.py` | route search (empty, to do) |
+| `web_app.py` | Main web navigation application (Streamlit) |
+| `map_folium.py` | Leaflet / Folium interactive indoor map renderer |
+| `movement.py` | Walking rules (WASD), floor changes (E/Q), buffer & GIS proximity |
+| `map_data.py` | CSV to polygons, corridors, physical wall collision |
+| `gis_ops.py` | Buffer and Spatial Join operations (Shapely) |
+| `floors/` | One settings file per floor (outline, voids, start, stair links) |
+| `csv/` | One room table per floor |
+| `check_floors.py` | Data integrity checker for rooms and stair links |
 
 Project rules, course requirements and open decisions: `CLAUDE.md`.
