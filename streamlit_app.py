@@ -5,9 +5,18 @@ Same rules as app.py (movement.py). Streamlit cannot read key presses by itself,
 the page has buttons, and a small script (KEYS_JS) presses them when you hit the
 keyboard keys. Every click redraws the Point (you) and the Buffer.
 """
+import importlib
 import matplotlib.pyplot as plt
 import streamlit as st
 from matplotlib.patches import Polygon as MplPolygon
+
+import map_data
+import map_view
+import movement
+
+importlib.reload(map_data)
+importlib.reload(map_view)
+importlib.reload(movement)
 
 from map_view import draw_floor
 from movement import Navigator
@@ -59,7 +68,7 @@ def press(action, *args):
         nav.set_radius(args[0])
         st.session_state.message = ""
     elif action == "reset":
-        nav.reset()
+        st.session_state.nav = Navigator()
         st.session_state.message = ""
 
 
