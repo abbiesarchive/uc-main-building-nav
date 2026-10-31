@@ -30,6 +30,7 @@ pip install -r requirements.txt
 
 ```
 python app.py              walk around (opens a window)
+streamlit run streamlit_app.py   walk around in the browser (buttons)
 python app.py 3            start on Lt. 3
 python check_floors.py     check all floors  (run this before every commit)
 python plot_floor.py 2     draw floor 2 and check it (add "overlay" to lay it on the plan image)

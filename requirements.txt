@@ -12,3 +12,4 @@ python-dateutil==3.0.0
 shapely==2.2.0
 six==1.17.0
 tzdata==2026.6
+streamlit==1.66.1
