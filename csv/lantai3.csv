@@ -1,0 +1,58 @@
+﻿floor,room_id,name,type,xmin,ymin,xmax,ymax
+3,03001,Lift Barat Lt 3,Lift,45.62,51.81,48.55,57.82
+3,03002,Lift Timur Lt 3,Lift,53.67,50,56.66,57.82
+3,03003,Tangga Barat Lt 3,Stairs,0,50,3.48,60
+3,03004,Tangga Utara Lt 3,Stairs,56.66,50,59.88,60
+3,03005,Tangga Timur Lt 3,Stairs,93,50,96,60
+3,03006,Tangga Selatan Lt 3,Stairs,53.85,0,60,3.48
+3,003001,Toilet Wanita Lt 3,Toilet,36,55.5,45.62,60
+3,003002,Toilet Pria Lt 3,Toilet,36,51,45.62,55.5
+3,003003,Toilet VIP Lt 3,Toilet,40.81,50,45.62,51
+3,003004,Toilet Disable Lt 3,Toilet,36,50,40.81,51
+3,0003001,Pantry Lt 3,Pantry,53.67,57.82,56.66,60
+3,323,Gudang 323,Storage,34.98,53,36,60
+3,326,Ruang Peralatan Keterampilan Medik (326),Storage,20.9,40,26.9,47.62
+3,325,Ruang Penyimpanan Manekin (325),Storage,0,40,20.9,47.62
+3,307308,Kelas 307- 308,Classroom,40,0,50,20
+3,309001,Kelas 309A,Classroom,40,20,50,25
+3,309002,Kelas 309B,Classroom,40,25,50,30
+3,327,Ruang Belajar Manekin 327,Classroom,26.9,40,31.2,47.62
+3,311,Lab Komputer 311,Lab,59.88,50,67,60
+3,312,Lab Komputer 312,Lab,67,50,76,60
+3,313,Lab Komputer 313,Lab,76,50,86,60
+3,315,Lab Mac 315,Lab,88,40,96,47.62
+3,316,Lab Mac 316,Lab,78,40,88,47.62
+3,318,Ruang Wakil Dekan 2 (318),LecturerRoom,66,40,69,47.62
+3,319,Ruang Wakil Dekan 3 (319),LecturerRoom,63,40,66,47.62
+3,320,HOD Medical Doctor Profession (320),LecturerRoom,60,40,63,47.62
+3,302,Ruang Dosen MDP (302),LecturerRoom,53.85,20,60,40
+3,304,Ruang Dosen MED (304),LecturerRoom,53.85,15,60,20
+3,310,Ruang Dosen MED (310),LecturerRoom,40,30,50,40
+3,330001,Ruang Wakil Dekan 3 (330A),LecturerRoom,41,40,45,47.62
+3,330,Ruang Dekan (330),LecturerRoom,38,40,41,47.62
+3,329,Ruang Wakil Dekan 2 (329),LecturerRoom,35,40,38,47.62
+3,328,Ruang Wakil Dekan 1 (328),LecturerRoom,31.2,40,35,47.62
+3,324001,Ruang Keterampilan Medik (324A),MeetingRoom,22.2,50,25.2,53
+3,324002,Ruang Keterampilan Medik (324B),MeetingRoom,19.2,50,22.2,53
+3,324003,Ruang Keterampilan Medik (324C),MeetingRoom,16.2,50,19.2,53
+3,324004,Ruang Keterampilan Medik (324D),MeetingRoom,13.2,50,16.2,53
+3,324005,Ruang Keterampilan Medik (324E),MeetingRoom,10.2,50,13.2,53
+3,324006,Ruang Keterampilan Medik (324F),MeetingRoom,7.2,50,10.2,53
+3,324007,Ruang Keterampilan Medik (324G),MeetingRoom,3.48,55.5,6.98,60
+3,324008,Ruang Keterampilan Medik (324H),MeetingRoom,6.98,55.5,10.48,60
+3,324009,Ruang Keterampilan Medik (324I),MeetingRoom,10.48,55.5,13.98,60
+3,324010,Ruang Keterampilan Medik (324J),MeetingRoom,13.98,55.5,17.48,60
+3,324011,Ruang Keterampilan Medik (324K),MeetingRoom,17.48,55.5,20.98,60
+3,324012,Ruang Keterampilan Medik (324L),MeetingRoom,20.98,55.5,24.48,60
+3,324013,Ruang Keterampilan Medik (324M),MeetingRoom,24.48,55.5,27.98,60
+3,324014,Ruang Keterampilan Medik (324N),MeetingRoom,27.98,55.5,31.48,60
+3,324015,Ruang Keterampilan Medik (324O),MeetingRoom,31.48,55.5,34.98,60
+3,321001,Ruang Tutor 321A,MeetingRoom,27,50,30,53
+3,321002,Ruang tutor 321B,MeetingRoom,30,50,33,53
+3,322,Ruang Penguji dan Kendali (322),MeetingRoom,33,50,36,53
+3,306 ,Ruang Meeting 306,MeetingRoom,53.85,3.48,60,10
+3,305,Ruang Meeting 305,MeetingRoom,53.85,10,60,15
+3,301,Academic Support Medical Doctor Profession (301),Office,53.85,40,60,47.62
+3,331,Academic Support Medical School (331),Office,45,40,50,47.62
+3,314,Ruang Server (314),ServerRoom,86,50,93,60
+3,317,Ruang Metrodata (317),ServerRoom,69,40,78,47.62

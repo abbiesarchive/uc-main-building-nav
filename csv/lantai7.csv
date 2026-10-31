@@ -1,0 +1,35 @@
+﻿floor,room_id,name,type,xmin,ymin,xmax,ymax
+7,07001,Lift Barat Lt 7,Lift,45.62,51.81,48.55,57.82
+7,07002,Lift Timur Lt 7,Lift,53.67,49.63,56.66,57.82
+7,07003,Tangga Barat Lt 7,Stairs,0,49.63,3.48,60
+7,07004,Tangga Utara Lt 7,Stairs,56.66,49.63,59.88,60
+7,007001,Toilet Wanita Lt 7,Toilet,36,55.5,45.62,60
+7,007002,Toilet Pria Lt 7,Toilet,36,51,45.62,55.5
+7,003003,Toilet VIP Lt 7,Toilet,40.81,50,45.62,51
+7,003004,Toilet Disable Lt 7,Toilet,36,50,40.81,51
+7,0007001,Pantry Lt 7,Pantry,53.67,57.82,56.66,60
+7,707,Storage 707,Storage,59.88,49.63,69.51,60
+7,708,Storage 708,Storage,69.51,55,75,60
+7,709,Storage 709,Storage,69.51,48,75,55
+7,710,Storage Auditorium (710),Storage,69.51,40,75,44
+7,702,Gudang Alat Fakultas Kedokteran (702),Storage,53,20,60,30
+7,712,Kelas 712,Classroom,26.52,49.63,36,60
+7,714001,Ruang Tutor 714A,MeetingRoom,0,40,3.48,46.75
+7,714002,Ruang Tutor 714B,MeetingRoom,3.48,40,6.96,46.75
+7,714003,Ruang Tutor 714C,MeetingRoom,6.96,40,10.44,46.75
+7,714004,Ruang Tutor 714D,MeetingRoom,10.44,40,13.77,46.75
+7,714005,Ruang Tutor 714E,MeetingRoom,13.77,40,17.1,46.75
+7,714006,Ruang Tutor 714F,MeetingRoom,17.1,40,20.43,46.75
+7,714007,Ruang Tutor 714G,MeetingRoom,20.43,40,23.76,46.75
+7,714008,Ruang Tutor 714H,MeetingRoom,23.76,40,27.09,46.75
+7,714009,Ruang Tutor 714I,MeetingRoom,27.09,40,30.42,46.75
+7,714010,Ruang Tutor 714J,MeetingRoom,30.42,40,33.63,46.75
+7,714011,Ruang Tutor 714K,MeetingRoom,33.63,40,36.84,46.75
+7,714012,Ruang Tutor 714L,MeetingRoom,36.84,40,40,46.75
+7,701001,Ruang Tutor 701A,MeetingRoom,53,36.6,60,40
+7,701002,Ruang Tutor 701B,MeetingRoom,53,33.3,60,36.6
+7,701003,Ruang Tutor 701C,MeetingRoom,53,30,60,33.3
+7,713,Theater 713,Theater,3.48,49.63,26.52,60
+7,711,Dian Auditorium Lt 7,Theater,75,40,96,60
+7,703704,Integrity Hall 703-704,Theater,40,0,60,20
+7,705706,Technospace 705-706,Theater,40,20,50,40
