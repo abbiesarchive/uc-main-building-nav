@@ -26,13 +26,14 @@ PART_OF = {}
 
 # Lift dan tangga pada Lantai 3.
 LINKS = {
-    "3001": {"up": "4", "down": "2", "cost": 10},  # Lift Barat
-    "3002": {"up": "4", "down": "2", "cost": 10},  # Lift Timur
-    "3003": {"up": "4", "down": "2", "cost": 20},  # Tangga Barat
-    "3004": {"up": "4", "down": "2", "cost": 20},  # Tangga Utara
-    "3005": {"up": "4", "down": "2", "cost": 20},  # Tangga Timur
-    "3006": {"up": "4", "down": "2", "cost": 20},  # Tangga Selatan
+    "03001": {"up": "4", "down": "2", "cost": 10},  # Lift Barat
+    "03002": {"up": "4", "down": "2", "cost": 10},  # Lift Timur
+    "03003": {"up": "4", "down": "2", "cost": 20},  # Tangga Barat
+    "03004": {"up": "4", "down": "2", "cost": 20},  # Tangga Utara
+    "03005": {"up": "4", "down": "2", "cost": 20},  # Tangga Timur
+    "03006": {"up": "4", "down": "2", "cost": 20},  # Tangga Selatan
 }
+
 
 # Gambar denah untuk overlay.
 IMAGE = "denah/lantai3.jpeg"
