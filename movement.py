@@ -14,7 +14,7 @@ from floors import load_all
 from gis_ops import buffer_around, rooms_along_route, spatial_join
 from map_data import LINK_TYPES, build_walkable, is_walkable, load_rooms, room_at
 
-STEP = 1                 # one key press = 1 m
+STEP = 2                 # one key press = 2 m (jalan lebih cepat)
 MIN_RADIUS, MAX_RADIUS = 1, 15
 
 
@@ -40,9 +40,14 @@ class Navigator:
 
     # ---- moving -----------------------------------------------------------
     def move(self, dx, dy):
-        """Step one meter. Returns a message, or "" when the step worked."""
+        """Step forward. Returns a message, or '' when the step worked."""
         nx, ny = self.x + dx * STEP, self.y + dy * STEP
         if not is_walkable(self.floor, nx, ny):
+            # Jika langkah 2 meter terhalang dinding, coba langkah 1 meter agar tidak macet
+            if STEP > 1 and is_walkable(self.floor, self.x + dx * 1, self.y + dy * 1):
+                self.x, self.y = self.x + dx * 1, self.y + dy * 1
+                self.trail.append((self.x, self.y))
+                return ""
             return "Blocked: that is the void or outside the building."
         self.x, self.y = nx, ny
         self.trail.append((nx, ny))
