@@ -3,7 +3,7 @@ Run:  streamlit run streamlit_app.py
 
 Same rules as app.py (movement.py). Streamlit cannot read key presses by itself, so
 the page has buttons, and a small script (KEYS_JS) presses them when you hit the
-keyboard keys. Every click redraws the Point (you), the Buffer and the trail.
+keyboard keys. Every click redraws the Point (you) and the Buffer.
 """
 import matplotlib.pyplot as plt
 import streamlit as st
@@ -72,8 +72,6 @@ def draw(nav, near):
         patches[room["room_id"]].set_linewidth(2.2)
     ax.add_patch(MplPolygon(list(nav.buffer().exterior.coords), closed=True, facecolor="#1565c0",
                             alpha=0.15, edgecolor="#1565c0", linewidth=1.5, zorder=3))
-    if len(nav.trail) > 1:
-        ax.plot(*zip(*nav.trail), "-", color="#1565c0", linewidth=2, zorder=6)
     ax.plot([nav.x], [nav.y], "o", color="#d00000", markersize=11, markeredgecolor="white", zorder=7)
     ax.set_title(f"Lt. {nav.floor}   you are at ({nav.x:g}, {nav.y:g}) m   "
                  f"(sizes are estimates, about +/- 0.5 m)", fontsize=10)
