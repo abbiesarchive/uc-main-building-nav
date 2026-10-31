@@ -43,7 +43,7 @@ class Navigator:
         """Step one meter. Returns a message, or "" when the step worked."""
         nx, ny = self.x + dx * STEP, self.y + dy * STEP
         if not is_walkable(self.floor, nx, ny):
-            return "Blocked: that is the void or outside the building."
+            return "Blocked: that is a closed room, the void or outside the building."
         self.x, self.y = nx, ny
         self.trail.append((nx, ny))
         return ""

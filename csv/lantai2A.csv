@@ -12,7 +12,6 @@ floor,room_id,name,type,xmin,ymin,xmax,ymax
 2A,214002,Ruang BOD (214B),Office,88.5,56.7,94.4,60
 2A,212002,Ruang Vice 2 (212B),Office,78.8,53.1,82.7,56.7
 2A,212001,Ruang Vice 1 (212A),Office,78.8,49.6,82.7,53.1
-2A,212,Ruang Directors (212),Office,82.7,54.8,90.4,56.7
 2A,213,Meeting Room 213,MeetingRoom,84.9,49.6,89.2,54.8
 2A,214001,Ruang EBO (214A),Office,90.4,53.1,94.4,56.7
 2A,214,Ruang EBO (214),Office,89.2,49.6,94.4,53.1

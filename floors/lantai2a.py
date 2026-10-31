@@ -26,5 +26,10 @@ LINKS = {
     "02008": {"down": "2", "cost": 8},
 }
 
+# Rooms are closed: you can only stand in corridors, open lobbies, stairs and lifts.
+# (Doors are not modeled yet, so you cannot go inside a room.)
+ROOMS_WALKABLE = False
+OPEN_ROOMS = ["LOBBY2A"]          # rooms that are really open space
+
 IMAGE = "denah/lantai2a.jpeg"
 CALIBRATION = (68, 171)
