@@ -96,9 +96,10 @@ def build_walkable(floor, rooms):
 
 
 def walkable_area(floor):
-    """Every room is walkable for now, so the walkable area is the outline
-    minus the voids."""
-    area = building(floor)
+    rooms = load_rooms(floor)
+    area = building(floor).difference(
+        unary_union([r["polygon"] for r in rooms])
+    )
     for void in voids(floor):
         area = area.difference(void)
     return area
