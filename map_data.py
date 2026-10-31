@@ -94,38 +94,38 @@ def build_walkable(floor, rooms):
                       "part_of": owner, "polygon": box(x0, y0, x1, y1)})
     return areas
 
-def walkable_area(floor):
-    """Every room is walkable for now, so the walkable area is the outline
-    minus the voids."""
-    area = building(floor)
-    for void in voids(floor):
-        area = area.difference(void)
-    return area
-
 # def walkable_area(floor):
-#     rooms = load_rooms(floor)
-#     # Ambil semua polygon ruangan
-#     room_polygons = [
-#         r["polygon"] for r in rooms
-#     ]
-#     # Ambil polygon tangga dan lift
-#     link_polygons = [
-#         r["polygon"]
-#         for r in rooms
-#         if r["type"].strip().lower() in ("stairs", "lift")
-#     ]
-#     # Gabungkan seluruh ruangan
-#     blocked_rooms = unary_union(room_polygons)
-#     # Area lantai dikurangi semua ruangan
-#     area = building(floor).difference(blocked_rooms)
-#     # Buka kembali area tangga dan lift
-#     if link_polygons:
-#         area = area.union(unary_union(link_polygons))
-#     # Kurangi area void
+#     """Every room is walkable for now, so the walkable area is the outline
+#     minus the voids."""
+#     area = building(floor)
 #     for void in voids(floor):
 #         area = area.difference(void)
-
 #     return area
+
+def walkable_area(floor):
+    rooms = load_rooms(floor)
+    # Ambil semua polygon ruangan
+    room_polygons = [
+        r["polygon"] for r in rooms
+    ]
+    # Ambil polygon tangga dan lift
+    link_polygons = [
+        r["polygon"]
+        for r in rooms
+        if r["type"].strip().lower() in ("stairs", "lift")
+    ]
+    # Gabungkan seluruh ruangan
+    blocked_rooms = unary_union(room_polygons)
+    # Area lantai dikurangi semua ruangan
+    area = building(floor).difference(blocked_rooms)
+    # Buka kembali area tangga dan lift
+    if link_polygons:
+        area = area.union(unary_union(link_polygons))
+    # Kurangi area void
+    for void in voids(floor):
+        area = area.difference(void)
+
+    return area
 
 
 def is_walkable(floor, x, y):
