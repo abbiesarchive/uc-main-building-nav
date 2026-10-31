@@ -10,3 +10,5 @@ csv/walkable_*.csv
 csv/*.before_*.csv
 floor_*.png
 map_*.png
+
+campus.db

@@ -30,15 +30,25 @@ def voids(floor):
     return [box(*rect) for rect in get_floor(floor).VOIDS]
 
 
+def read_csv(path):
+    df = pd.read_csv(path, dtype={"floor": str, "room_id": str})
+    df.columns = df.columns.str.strip()
+    return df
+
+
 def load_rooms(floor, csv_path=None):
     """Return a list of dicts: room_id, name, type, polygon."""
-    csv_path = csv_path or ROOT / get_floor(floor).ROOMS_CSV
-    df = pd.read_csv(csv_path, dtype={"floor": str, "room_id": str})
-    df.columns = df.columns.str.strip()
-    df = df[df["floor"] == floor]
+    settings = get_floor(floor)
+    df = read_csv(csv_path or ROOT / settings.ROOMS_CSV)
+    parts = [df[df["floor"] == floor]]
+    # rooms shared with another floor (the Lt. 2 / 2A core) are stored once, there
+    for other, ids in settings.SHARED.items():
+        other_df = read_csv(ROOT / get_floor(other).ROOMS_CSV)
+        parts.append(other_df[other_df["room_id"].isin(ids)])
+    rows = pd.concat(parts)
     return [{"room_id": r.room_id, "name": r.name, "type": r.type,
              "polygon": box(r.xmin, r.ymin, r.xmax, r.ymax)}
-            for r in df.itertuples()]
+            for r in rows.itertuples()]
 
 
 def free_rectangles(rooms, floor):
