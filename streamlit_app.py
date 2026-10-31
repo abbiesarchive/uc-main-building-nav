@@ -1,8 +1,9 @@
 """Walk through the building in the browser.
 Run:  streamlit run streamlit_app.py
 
-Same rules as app.py (movement.py), but the keys are buttons, because Streamlit
-cannot read key presses. Every click redraws the Point (you), the Buffer and the trail.
+Same rules as app.py (movement.py). Streamlit cannot read key presses by itself, so
+the page has buttons, and a small script (KEYS_JS) presses them when you hit the
+keyboard keys. Every click redraws the Point (you), the Buffer and the trail.
 """
 import matplotlib.pyplot as plt
 import streamlit as st
@@ -12,6 +13,32 @@ from map_view import draw_floor
 from movement import Navigator
 
 MAX_LINES = 10
+
+# keyboard key -> label of the button to press
+KEYS_JS = """
+<script>
+const doc = window.parent.document;
+if (!window.parent.__ucKeys) {
+  window.parent.__ucKeys = true;
+  const keys = {w: "W", a: "A", s: "S", d: "D", e: "E", q: "Q",
+                ArrowUp: "W", ArrowLeft: "A", ArrowDown: "S", ArrowRight: "D"};
+  doc.addEventListener("keydown", (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    if (["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName)) return;
+    const label = keys[event.key] || keys[event.key.toLowerCase()];
+    if (!label) return;
+    for (const button of doc.querySelectorAll("button")) {
+      const text = button.innerText.trim();
+      if (text === label || (label === "E" || label === "Q") && text.startsWith(label + " ")) {
+        event.preventDefault();
+        button.click();
+        return;
+      }
+    }
+  });
+}
+</script>
+"""
 
 
 def get_nav():
@@ -59,6 +86,8 @@ near = nav.nearby()
 
 st.pyplot(draw(nav, near))
 plt.close("all")
+st.iframe(KEYS_JS, height=1)
+st.caption("Keyboard works too: W A S D or arrows walk, E up, Q down (click the page first).")
 
 controls, info = st.columns([1, 2])
 with controls:
