@@ -1,4 +1,4 @@
-﻿floor ,room_id,name,type,xmin,ymin,xmax,ymax
+﻿floor,room_id,name,type,xmin,ymin,xmax,ymax
 7,07001,Lift Barat Lt 7,Lift,45.62,51.81,48.55,57.82
 7,07002,Lift Timur Lt 7,Lift,53.67,49.63,56.66,57.82
 7,07003,Tangga Barat Lt 7,Stairs,0,49.63,3.48,60
