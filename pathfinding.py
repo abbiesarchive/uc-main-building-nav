@@ -196,25 +196,25 @@ def get_current_instruction(current_floor, pos, target_room):
             return f"🎉 Anda telah sampai di ruangan {target_room['name']}!"
         pts = list(line.simplify(1.2).coords)
         if len(pts) <= 2:
-            return f"📍 Lurus sejauh {round(line.length)} m menuju ruangan {target_room['name']}"
+            return f"Lurus sejauh {round(line.length)} m menuju ruangan {target_room['name']}"
 
         d_turn = math.hypot(pts[1][0] - pos[0], pts[1][1] - pos[1])
         v1 = (pts[1][0] - pts[0][0], pts[1][1] - pts[0][1])
         v2 = (pts[2][0] - pts[1][0], pts[2][1] - pts[1][1])
         cross = v1[0] * v2[1] - v1[1] * v2[0]
         turn = "belok kiri" if cross > 0 else "belok kanan"
-        return f"📍 Lurus sejauh {round(d_turn)} m, lalu {turn} menuju ruangan {target_room['name']}"
+        return f"Lurus sejauh {round(d_turn)} m, lalu {turn} menuju ruangan {target_room['name']}"
     else:
         # Kasus beda lantai: menuju lift atau tangga yang memang jalannya
         arah = "naik" if int(target_floor[0]) > int(current_floor[0]) else "turun"
         if line.length < 2.0:
-            return f"📍 Gunakan {dest['name']} untuk {arah} ke Lantai {target_floor} (Tujuan: {target_room['name']})"
+            return f"Gunakan {dest['name']} untuk {arah} ke Lantai {target_floor} (Tujuan: {target_room['name']})"
         pts = list(line.simplify(1.2).coords)
         if len(pts) <= 2:
-            return f"📍 Lurus sejauh {round(line.length)} m menuju {dest['name']} untuk {arah} ke Lt. {target_floor}"
+            return f"Lurus sejauh {round(line.length)} m menuju {dest['name']} untuk {arah} ke Lt. {target_floor}"
         d_turn = math.hypot(pts[1][0] - pos[0], pts[1][1] - pos[1])
         v1 = (pts[1][0] - pts[0][0], pts[1][1] - pts[0][1])
         v2 = (pts[2][0] - pts[1][0], pts[2][1] - pts[1][1])
         cross = v1[0] * v2[1] - v1[1] * v2[0]
         turn = "belok kiri" if cross > 0 else "belok kanan"
-        return f"📍 Lurus sejauh {round(d_turn)} m, lalu {turn} menuju {dest['name']} ({arah} ke Lt. {target_floor})"
+        return f"Lurus sejauh {round(d_turn)} m, lalu {turn} menuju {dest['name']} ({arah} ke Lt. {target_floor})"
