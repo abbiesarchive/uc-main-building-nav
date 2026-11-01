@@ -22,6 +22,11 @@ def get_room_center(room):
     return (round(c.x, 1), round(c.y, 1))
 
 
+def heuristic(p1, p2):
+    """Fungsi heuristik A* menggunakan jarak Euclidean (admissible dan konsisten)."""
+    return math.hypot(p1[0] - p2[0], p1[1] - p2[1])
+
+
 def astar_to_room(floor, start, target_room):
     """Algoritma A* menuju tepat ke ruangan / lift / tangga melewati koridor tanpa memotong lift/tangga/ruangan lain."""
     rooms = load_rooms(floor)
@@ -67,12 +72,37 @@ def astar_to_room(floor, start, target_room):
     sx, sy = round(start[0]), round(start[1])
     start_pt = (sx, sy)
     dirs = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
-    queue = [(0, 0, start_pt, [start_pt])]
-    visited = {start_pt: 0}
 
-    while queue:
-        _, cost, current, path = heapq.heappop(queue)
-        if math.hypot(current[0] - entry[0], current[1] - entry[1]) <= 1.2:
+    # Inisialisasi struktur data A* standar:
+    # open_set   : Priority queue menyimpan tuple (f_score, g_score, node)
+    # came_from  : Map penelusuran balik (parent pointer) untuk rekonstruksi rute optimal
+    # g_score    : Biaya aktual terkecil dari start ke setiap node (g(n))
+    # f_score    : Estimasi total biaya f(n) = g(n) + h(n)
+    # closed_set : Node yang sudah dievaluasi optimal
+    open_set = []
+    came_from = {}
+    g_score = {start_pt: 0.0}
+    f_score = {start_pt: heuristic(start_pt, entry)}
+    heapq.heappush(open_set, (f_score[start_pt], 0.0, start_pt))
+    closed_set = set()
+
+    while open_set:
+        current_f, current_g, current = heapq.heappop(open_set)
+
+        if current in closed_set:
+            continue
+        closed_set.add(current)
+
+        # Evaluasi apakah sudah mencapai radius target/entry (toleransi 1.2 m)
+        if heuristic(current, entry) <= 1.2:
+            # Rekonstruksi rute optimal dari came_from
+            curr = current
+            path = [curr]
+            while curr in came_from:
+                curr = came_from[curr]
+                path.append(curr)
+            path.reverse()
+
             full_path = [start] + path[1:] + [entry, goal]
             cleaned = [full_path[0]]
             for p in full_path[1:]:
@@ -82,14 +112,22 @@ def astar_to_room(floor, start, target_room):
 
         for dx, dy in dirs:
             nx, ny = current[0] + dx, current[1] + dy
+            neighbor = (nx, ny)
+
+            if neighbor in closed_set:
+                continue
+
             if can_pass(nx, ny):
                 step_cost = math.hypot(dx, dy)
-                new_cost = cost + step_cost
-                neighbor = (nx, ny)
-                if neighbor not in visited or new_cost < visited[neighbor]:
-                    visited[neighbor] = new_cost
-                    h = math.hypot(nx - entry[0], ny - entry[1])
-                    heapq.heappush(queue, (new_cost + h, new_cost, neighbor, path + [neighbor]))
+                tentative_g = current_g + step_cost
+
+                if tentative_g < g_score.get(neighbor, float("inf")):
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g
+                    h = heuristic(neighbor, entry)
+                    f = tentative_g + h
+                    f_score[neighbor] = f
+                    heapq.heappush(open_set, (f, tentative_g, neighbor))
 
     return LineString([start, goal])
 
