@@ -9,6 +9,7 @@ ROOMS_CSV = "csv/lantai7.csv"
 OUTLINE = [
     (0, 47.62, 96, 50),
     (0, 40, 96, 60),      
+    (96, 49.63, 99.45, 60),   # Tangga Timur at the east end
     (40, 0, 60, 40),      
 ]
 
@@ -22,7 +23,6 @@ LINKS = {
     "07003": {"down": "6", "cost": 20},  # Tangga Barat
     "07004": {"down": "6", "cost": 20},  # Tangga Utara
     "07005": {"down": "6", "cost": 20},  # Tangga Timur
-    "07006": {"down": "6", "cost": 20},  # Tangga Selatan
 }
 
 

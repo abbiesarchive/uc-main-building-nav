@@ -9,6 +9,7 @@ ROOMS_CSV = "csv/lantai4.csv"
 OUTLINE = [
     (0, 47.62, 96, 50),
     (0, 40, 96, 60),      
+    (96, 50, 99.45, 60),   # Tangga Timur at the east end
     (40, 0, 60, 40),      
 ]
 

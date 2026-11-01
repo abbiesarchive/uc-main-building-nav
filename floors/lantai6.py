@@ -29,7 +29,7 @@ LINKS = {
     "06003": {"up": "7", "down": "5", "cost": 8},   # Tangga Barat
     "06004": {"up": "7", "down": "5", "cost": 8},   # Tangga Utara
     "06005": {"up": "7", "down": "5", "cost": 8},   # Tangga Timur
-    "06006": {"up": "7", "down": "5", "cost": 8},   # Tangga Selatan
+    "06006": {"down": "5", "cost": 8},   # Tangga Selatan (not on the Lt. 7 plan)
 }
 
 # Only for the overlay check on the plan image (plot_floor.py ... overlay).

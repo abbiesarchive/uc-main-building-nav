@@ -34,7 +34,7 @@ LINKS = {
     "01003": {"up": "2", "down": None, "cost": 10},  # Tangga Barat Lt 1
     "01004": {"up": "2", "down": None, "cost": 10},  # Tangga Utara Lt 1
     "01005": {"up": "2", "down": None, "cost": 10},  # Tangga Timur Lt 1
-    "01006": {"up": "2", "down": None, "cost": 10},  # Tangga Selatan Lt 1
+    "01006": {},  # Tangga Selatan: no steps on the plan, Lt. 2 Selatan is not modeled
 }
 
 # Only for the overlay check on the plan image (plot_floor.py ... overlay).

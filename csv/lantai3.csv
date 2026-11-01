@@ -3,7 +3,7 @@ floor,room_id,name,type,xmin,ymin,xmax,ymax
 3,03002,Lift Timur Lt 3,Lift,53.67,50.0,56.66,57.82
 3,03003,Tangga Barat Lt 3,Stairs,0.0,50.0,3.48,60.0
 3,03004,Tangga Utara Lt 3,Stairs,56.66,50.0,59.88,60.0
-3,03005,Tangga Timur Lt 3,Stairs,93.0,50.0,96.0,60.0
+3,03005,Tangga Timur Lt 3,Stairs,96.1,50.0,99.45,60.0
 3,03006,Tangga Selatan Lt 3,Stairs,53.85,0.0,60.0,3.48
 3,003001,Toilet Wanita Lt 3,Toilet,36.0,55.5,45.62,60.0
 3,003002,Toilet Pria Lt 3,Toilet,36.0,51.0,45.62,55.5
