@@ -7,19 +7,14 @@ ROOMS_CSV = "csv/lantai5.csv"
 
 # Where people can be: rectangles (xmin, ymin, xmax, ymax).
 OUTLINE = [
-    (-1.5, 39.5, 39.7, 47.0),
-    (0.0, 47.0, 99.45, 60.0),
-    (39.7, 1.7, 60.3, 47.0),
-    (60.3, 40.4, 78.9, 47.0),
-    (78.9, 39.5, 99.45, 47.0),
-    (38.2, 1.7, 39.7, 39.5),
-    (60.3, 4.6, 62.0, 40.4),
+    (0.0, 40.0, 99.45, 60.0),   # Sayap atas penuh dari X=0 sampai 99.45
+    (39.7, 0.0, 60.3, 40.0),    # Sayap bawah mulai dari Y=0.0 sampai 40.0
 ]
 
 # Holes in the floor. Nobody can stand there.
 VOIDS = [
-    (38.2, 1.7, 39.7, 39.5),
-    (60.3, 4.6, 62.0, 40.4),
+    # (38.2, 1.7, 39.7, 39.5),
+    # (60.3, 4.6, 62.0, 40.4),
 ]
 
 # Where the dot starts (x, y).
@@ -27,8 +22,7 @@ START = (51.8, 48.5)
 
 # Open patches that belong to a room: room_id -> a point inside the patch.
 PART_OF = {
-    "513": (64.5, 47.5),
-    "510": (89.0, 47.5),
+    
 }
 
 # Stairs and lifts on THIS floor: room_id -> where it leads.

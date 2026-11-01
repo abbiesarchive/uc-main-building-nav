@@ -8,6 +8,7 @@ keyboard keys. Every click redraws the Point (you) and the Buffer.
 import matplotlib.pyplot as plt
 import streamlit as st
 from matplotlib.patches import Polygon as MplPolygon
+import streamlit.components.v1 as components
 
 from map_view import draw_floor
 from movement import Navigator
@@ -84,7 +85,11 @@ near = nav.nearby()
 
 st.pyplot(draw(nav, near))
 plt.close("all")
-st.iframe(KEYS_JS, height=1)
+
+# st.iframe(KEYS_JS, height=1)
+
+components.html(KEYS_JS, height=1)
+
 st.caption("Keyboard works too: W A S D or arrows walk, E up, Q down (click the page first).")
 
 controls, info = st.columns([1, 2])
