@@ -1,30 +1,27 @@
 """Walk through the building in the browser.
 Run:  streamlit run streamlit_app.py
-
-Same rules as app.py (movement.py). Streamlit cannot read key presses by itself, so
-the page has buttons, and a small script (KEYS_JS) presses them when you hit the
-keyboard keys. Every click redraws the Point (you) and the Buffer.
 """
 import importlib
 import matplotlib.pyplot as plt
 import streamlit as st
 from matplotlib.patches import Polygon as MplPolygon
-import streamlit.components.v1 as components
 
 import map_data
 import map_view
 import movement
+import pathfinding
 
 importlib.reload(map_data)
 importlib.reload(map_view)
 importlib.reload(movement)
+importlib.reload(pathfinding)
 
 from map_view import draw_floor
 from movement import Navigator
+from pathfinding import get_all_rooms, find_route, get_current_instruction
 
 MAX_LINES = 10
 
-# keyboard key -> label of the button to press
 KEYS_JS = """
 <script>
 const doc = window.parent.document;
@@ -71,18 +68,29 @@ def press(action, *args):
     elif action == "reset":
         st.session_state.nav = Navigator()
         st.session_state.message = ""
+        st.session_state.target_room = None
+        st.session_state.selected_room_label = None
+        st.session_state.search_ver = st.session_state.get("search_ver", 0) + 1
 
 
-def draw(nav, near):
+def draw(nav, near, route_line=None):
     data = nav.floors[nav.floor]
     fig, ax = plt.subplots(figsize=(10, 5.2))
     patches = draw_floor(ax, nav.floor, data["rooms"], data["walkable"])
     for room, _ in near:
         patches[room["room_id"]].set_edgecolor("#d00000")
         patches[room["room_id"]].set_linewidth(2.2)
+
+    # Gambar rute AI LineString jika ada tujuan aktif
+    if route_line and len(route_line.coords) > 1:
+        rx, ry = route_line.xy
+        ax.plot(rx, ry, color="#0077b6", linewidth=4.0, zorder=6, linestyle="-", label="Rute")
+        gx, gy = route_line.coords[-1]
+        ax.plot([gx], [gy], "s", color="#ffb703", markersize=10, markeredgecolor="#000", zorder=7)
+
     ax.add_patch(MplPolygon(list(nav.buffer().exterior.coords), closed=True, facecolor="#1565c0",
                             alpha=0.15, edgecolor="#1565c0", linewidth=1.5, zorder=3))
-    ax.plot([nav.x], [nav.y], "o", color="#d00000", markersize=11, markeredgecolor="white", zorder=7)
+    ax.plot([nav.x], [nav.y], "o", color="#d00000", markersize=11, markeredgecolor="white", zorder=8)
     ax.set_title(f"Lt. {nav.floor}   posisi: ({nav.x:g}, {nav.y:g}) m", fontsize=10)
     plt.tight_layout()
     return fig
@@ -95,11 +103,53 @@ near = nav.nearby()
 st.title("Campus Indoor Navigation")
 st.iframe(KEYS_JS, height=1)
 
+# 1 Input Gabungan: Ketik langsung untuk mencari atau pilih dari daftar ruangan
+all_rooms = get_all_rooms()
+room_dict = {f"{r['room_id']} - {r['name']} (Lt. {r['floor']})": r for r in all_rooms}
+room_options = ["-- Cari / Pilih Ruangan Tujuan (Semua Lantai) --"] + sorted(room_dict.keys())
+
+search_ver = st.session_state.get("search_ver", 0)
+
+col_search, col_clear = st.columns([4, 1])
+with col_search:
+    curr_label = st.session_state.get("selected_room_label")
+    selected_idx = room_options.index(curr_label) if curr_label in room_options else 0
+    selected_label = st.selectbox(
+        "Cari Ruangan Tujuan (Semua Lantai):",
+        options=room_options,
+        index=selected_idx,
+        key=f"search_room_select_{search_ver}"
+    )
+    if selected_label in room_dict:
+        st.session_state.target_room = room_dict[selected_label]
+        st.session_state.selected_room_label = selected_label
+    else:
+        st.session_state.target_room = None
+        st.session_state.selected_room_label = None
+
+with col_clear:
+    st.write("")
+    st.write("")
+    if st.button("Hapus Rute", use_container_width=True):
+        st.session_state.target_room = None
+        st.session_state.selected_room_label = None
+        st.session_state.search_ver = search_ver + 1
+        st.rerun()
+
+# Hitung rute navigasi dan 1 arahan langkah aktif saat ini
+route_line, current_instruction = None, ""
+if st.session_state.target_room:
+    route_line, _, _ = find_route(nav.floor, (nav.x, nav.y), st.session_state.target_room)
+    current_instruction = get_current_instruction(nav.floor, (nav.x, nav.y), st.session_state.target_room)
+
+# Layout 2 Kolom (Denah di kiri, Kontrol & Info di kanan)
 col_map, col_info = st.columns([2.3, 1])
 
 with col_map:
     st.subheader(f"Denah Lantai {nav.floor}")
-    st.pyplot(draw(nav, near))
+    if current_instruction:
+        st.info(f"**{current_instruction}**")
+    st.pyplot(draw(nav, near, route_line))
     plt.close("all")
     st.caption("Keyboard: W A S D / panah untuk jalan, E naik lantai, Q turun lantai.")
 
