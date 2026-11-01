@@ -5,10 +5,19 @@ Same rules as app.py (movement.py). Streamlit cannot read key presses by itself,
 the page has buttons, and a small script (KEYS_JS) presses them when you hit the
 keyboard keys. Every click redraws the Point (you) and the Buffer.
 """
+import importlib
 import matplotlib.pyplot as plt
 import streamlit as st
 from matplotlib.patches import Polygon as MplPolygon
 import streamlit.components.v1 as components
+
+import map_data
+import map_view
+import movement
+
+importlib.reload(map_data)
+importlib.reload(map_view)
+importlib.reload(movement)
 
 from map_view import draw_floor
 from movement import Navigator
@@ -60,13 +69,13 @@ def press(action, *args):
         nav.set_radius(args[0])
         st.session_state.message = ""
     elif action == "reset":
-        nav.reset()
+        st.session_state.nav = Navigator()
         st.session_state.message = ""
 
 
 def draw(nav, near):
     data = nav.floors[nav.floor]
-    fig, ax = plt.subplots(figsize=(14, 4.6))
+    fig, ax = plt.subplots(figsize=(10, 5.2))
     patches = draw_floor(ax, nav.floor, data["rooms"], data["walkable"])
     for room, _ in near:
         patches[room["room_id"]].set_edgecolor("#d00000")
@@ -74,8 +83,8 @@ def draw(nav, near):
     ax.add_patch(MplPolygon(list(nav.buffer().exterior.coords), closed=True, facecolor="#1565c0",
                             alpha=0.15, edgecolor="#1565c0", linewidth=1.5, zorder=3))
     ax.plot([nav.x], [nav.y], "o", color="#d00000", markersize=11, markeredgecolor="white", zorder=7)
-    ax.set_title(f"Lt. {nav.floor}   you are at ({nav.x:g}, {nav.y:g}) m   "
-                 f"(sizes are estimates, about +/- 0.5 m)", fontsize=10)
+    ax.set_title(f"Lt. {nav.floor}   posisi: ({nav.x:g}, {nav.y:g}) m", fontsize=10)
+    plt.tight_layout()
     return fig
 
 
@@ -83,17 +92,25 @@ st.set_page_config(page_title="UC Main Building - navigation", layout="wide")
 nav = get_nav()
 near = nav.nearby()
 
-st.pyplot(draw(nav, near))
-plt.close("all")
+st.title("Campus Indoor Navigation")
+st.iframe(KEYS_JS, height=1)
 
-# st.iframe(KEYS_JS, height=1)
+col_map, col_info = st.columns([2.3, 1])
 
-components.html(KEYS_JS, height=1)
+with col_map:
+    st.subheader(f"Denah Lantai {nav.floor}")
+    st.pyplot(draw(nav, near))
+    plt.close("all")
+    st.caption("Keyboard: W A S D / panah untuk jalan, E naik lantai, Q turun lantai.")
 
-st.caption("Keyboard works too: W A S D or arrows walk, E up, Q down (click the page first).")
+with col_info:
+    here = nav.here()
+    st.write(f"**You are in:** {here['name'] + ' (' + here['type'] + ')' if here else 'corridor / lobby'}")
+    if nav.link_hint():
+        st.info(nav.link_hint())
+    if st.session_state.message:
+        st.warning(st.session_state.message)
 
-controls, info = st.columns([1, 2])
-with controls:
     st.write("**Walk (1 m per click)**")
     _, up, _ = st.columns(3)
     left, down, right = st.columns(3)
@@ -113,18 +130,10 @@ with controls:
     plus.button("+", on_click=press, args=("radius", +1), use_container_width=True)
     reset.button("Restart", on_click=press, args=("reset",), use_container_width=True)
 
-with info:
-    here = nav.here()
-    st.write(f"**You are in:** {here['name'] + ' (' + here['type'] + ')' if here else 'corridor / lobby'}")
-    if nav.link_hint():
-        st.info(nav.link_hint())
-    if st.session_state.message:
-        st.warning(st.session_state.message)
-
-    st.write(f"**Rooms in the buffer ({len(near)}):**")
+    st.write(f"**Rooms in buffer ({len(near)}):**")
     st.text("\n".join(
         f"{'inside' if dist == 0 else f'{dist:.1f} m':>7}  {room['room_id']}  {room['name']}"
         for room, dist in near[:MAX_LINES]) + (f"\n... and {len(near) - MAX_LINES} more" if len(near) > MAX_LINES else ""))
 
     passed = [room["room_id"] for room in nav.visited()]
-    st.write(f"**Rooms your trail passed ({len(passed)}):** " + ", ".join(passed))
+    st.write(f"**Trail passed ({len(passed)}):** " + ", ".join(passed))
