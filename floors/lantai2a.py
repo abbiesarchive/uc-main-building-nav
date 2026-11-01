@@ -17,8 +17,8 @@ SHARED = {"2": ["02001", "02002", "02003", "02005", "02006", "02007", "02008",
 # Lifts go on to Lt. 3. The other stairs are half flights down to Lt. 2 (unconfirmed
 # for the end stairs 02003 / 02005). Each one matches the "up" entry in lantai2.py.
 LINKS = {
-    "02001": {"up": "3", "down": "2", "cost": 10},
-    "02002": {"up": "3", "down": "2", "cost": 10},
+    "02001": {"up": "3", "down": "2", "cost": 10},   # Lift Barat -> Lt. 3
+    "02002": {"up": "4", "down": "2", "cost": 10},   # Lift Timur -> Lt. 4
     "02003": {"down": "2", "cost": 8},
     "02005": {"down": "2", "cost": 8},
     "02006": {"down": "2", "cost": 8},

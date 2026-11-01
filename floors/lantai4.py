@@ -17,8 +17,8 @@ START = (50, 55)
 
 # Lift dan tangga pada Lantai 4.
 LINKS = {
-    "04001": {"up": "5", "down": "3", "cost": 10},  # Lift Barat
-    "04002": {"up": "5", "down": "3", "cost": 10},  # Lift Timur
+    "04001": {},  # Lift Barat tidak akses Lt. 4
+    "04002": {"up": "7", "down": "2", "cost": 10},  # Lift Timur -> Lt. 7 / Lt. 2
     "04003": {"up": "5", "down": "3", "cost": 20},  # Tangga Barat
     "04004": {"up": "5", "down": "3", "cost": 20},  # Tangga Utara
     "04005": {"up": "5", "down": "3", "cost": 20},  # Tangga Timur

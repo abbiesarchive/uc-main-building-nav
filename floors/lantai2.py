@@ -19,8 +19,8 @@ PART_OF = {"203": (86, 59), "226": (32, 48.7), "225": (24, 42)}
 #   "up" / "down" = the floor you arrive on, "cost" = walking penalty for the route search.
 # The other floor's file must have the matching stair going back (check_floors.py tests this).
 LINKS = {
-    "02001": {"up": "2A", "down": "1", "cost": 10},   # lifts: assumed to stop at every level
-    "02002": {"up": "2A", "down": "1", "cost": 10},
+    "02001": {"up": "3", "down": "1", "cost": 10},   # Lift Barat: akses 1, 2, 3, 5, 7
+    "02002": {"up": "4", "down": "1", "cost": 10},   # Lift Timur: akses 1, 2, 4, 6, 7
     "02003": {"up": "2A", "cost": 8},                 # end stairs: half flight, unconfirmed
     "02005": {"up": "2A", "cost": 8},
     "02004": {"up": "3", "cost": 20},                 # Tangga Utara skips 2A
