@@ -107,15 +107,18 @@ def build_walkable(floor, rooms):
 
 @lru_cache
 def walkable_area(floor):
-    """Where the dot can stand: the outline minus the voids and closed rooms.
-    Only corridors, stairs, lifts, and rooms of type 'Lounge' are walkable."""
+    """Where the dot can stand: the outline minus the voids. Unless a floor sets
+    ROOMS_WALKABLE = True, also minus every room except stairs, lifts, Lounges and
+    the rooms listed in OPEN_ROOMS. Each blocked room is grown by 1 cm so its wall
+    line is blocked too (otherwise the dot could walk along the wall)."""
     settings = get_floor(floor)
     area = building(floor)
     for void in voids(floor):
         area = area.difference(void)
-    for room in load_rooms(floor):
-        if room["type"] not in LINK_TYPES and room["type"] != "Lounge" and room["room_id"] not in settings.OPEN_ROOMS:
-            area = area.difference(room["polygon"].buffer(0.01, join_style="mitre"))
+    if not settings.ROOMS_WALKABLE:
+        for room in load_rooms(floor):
+            if room["type"] not in LINK_TYPES and room["type"] != "Lounge" and room["room_id"] not in settings.OPEN_ROOMS:
+                area = area.difference(room["polygon"].buffer(0.01, join_style="mitre"))
     return area
 
 

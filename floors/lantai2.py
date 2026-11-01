@@ -29,6 +29,9 @@ LINKS = {
     "02008": {"up": "2A", "cost": 8},
 }
 
+# Rooms the dot may walk into although rooms are closed (the whole library area).
+OPEN_ROOMS = ["222", "222001", "222002", "223", "224", "225"]
+
 # Only for the overlay check on the plan image (plot_floor.py ... overlay).
 IMAGE = "denah/lantai2.jpeg"
 CALIBRATION = (80, 175)           # pixel of the west column axis, pixel of the top wall

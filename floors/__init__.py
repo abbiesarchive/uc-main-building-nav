@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent   # the project folder
 
 REQUIRED = ["FLOOR", "LEVEL", "ROOMS_CSV", "OUTLINE", "START"]
-OPTIONAL = {"VOIDS": [], "PART_OF": {}, "LINKS": {}, "SHARED": {}, "ROOMS_WALKABLE": True, "OPEN_ROOMS": [], "IMAGE": None, "CALIBRATION": None}
+OPTIONAL = {"VOIDS": [], "PART_OF": {}, "LINKS": {}, "SHARED": {}, "ROOMS_WALKABLE": False, "OPEN_ROOMS": [], "IMAGE": None, "CALIBRATION": None}
 
 
 @lru_cache
