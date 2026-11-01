@@ -1,32 +1,55 @@
 floor,room_id,name,type,xmin,ymin,xmax,ymax
-1,01003,Tangga Barat Lt 1,Stairs,0.0,49.5,3.0,60.0
-1,113003,113C,Lab,3.0,58.0,5.5,60.0
-1,113002,113B,Lab,3.0,55.0,5.5,58.0
-1,113001,Microscopes (113A),Lab,3.0,49.5,5.5,55.0
-1,112,Laboratorium Mikrobiologi (112),Lab,5.5,49.5,24.5,60.0
-1,111,Laboratorium Parasitologi (111),Lab,24.5,49.5,34.5,60.0
-1,001001,Toilet Wanita Lt 1,Toilet,36.5,54.5,40.0,60.0
-1,001002,Toilet Pria Lt 1,Toilet,36.5,49.5,40.0,54.5
-1,102,Musholla Wanita (102),PrayerRoom,40.0,56.0,45.5,60.0
-1,101,LOT (101),Lab,40.0,49.5,45.5,56.0
-1,103,Ruang Server (103),ServerRoom,45.5,57.7,49.5,60.0
-1,01001,Lift Barat Lt 1,Lift,45.5,53.3,49.5,57.7
-1,12,Bank,ATMRoom,45.5,49.5,49.5,53.3
-1,114,Laboratorium Biokimia (114),Lab,0.0,40.0,15.0,46.5
-1,115,Laboratorium Patologi Klinik (115),Lab,15.0,40.0,29.0,46.5
-1,115001,Lab Penelitian (115A),Lab,29.0,40.0,36.5,46.5
-1,116,Health Care Room (116),Clinic,36.5,40.0,40.0,44.5
-1,01002,Lift Timur Lt 1,Lift,53.5,50.0,57.5,60.0
-1,01004,Tangga Utara Lt 1,Stairs,57.5,50.0,60.5,60.0
-1,104,Workshop & Business Unit (104),Lab,60.5,50.0,70.0,60.0
-1,105,CBz Hot Kitchen Lab (105),Lab,70.0,50.0,78.5,60.0
-1,106,Restaurant & Bar (106),Lab,60.5,40.0,70.0,50.0
-1,108,CBz Pastry Kitchen Lab (108),Lab,70.0,40.0,78.5,47.0
-1,107,CBz Kitchen Studio Lab (107),Lab,78.5,40.0,88.5,60.0
-1,107001,Laboratorium Support (107A),Lab,78.5,40.0,80.5,44.5
-1,109,CBz Kitchen Studio Lab (109),Lab,88.5,40.0,99.5,50.0
-1,110,CBz Beverages Lab (110),Lab,88.5,50.0,96.5,60.0
-1,01005,Tangga Timur Lt 1,Stairs,96.5,50.0,99.5,60.0
-1,10,UC Main Building Lobby,Outdoor,45.5,60.0,57.5,64.0
-1,11,UC Plaza,Outdoor,38.0,0.0,62.0,40.0
-1,01006,Tangga Selatan Lt 1,Stairs,62.0,0.0,71.0,3.0
+6,06003,Tangga Barat Lt 6,Stairs,0.0,50.2,3.0,60.0
+6,619002,Station 1 (619B),Lab,3.0,55.8,8.2,60.0
+6,618004,Station 2 (618D),Lab,8.2,55.8,13.4,60.0
+6,618003,Station 3 (618C),Lab,13.4,55.8,18.7,60.0
+6,617004,Station 4 (617D),Lab,18.7,55.8,23.8,60.0
+6,617003,Station 5 (617C),Lab,23.8,55.8,29.1,60.0
+6,616003,Station 6 (616C),Lab,29.1,55.8,34.3,60.0
+6,616002,Station 7 (616B),Lab,34.3,55.8,39.7,60.0
+6,619001,Ruang Kendali (619A),Lab,5.4,49.2,9.7,53.5
+6,618002,Station 12 (618B),Lab,9.7,49.2,14.9,53.5
+6,618001,Station 11 (618A),Lab,14.9,49.2,20.0,53.5
+6,617002,Station 10 (617B),Lab,20.0,49.2,25.3,53.5
+6,617001,Station 9 (617A),Lab,25.3,49.2,30.5,53.5
+6,616001,Station 8 (616A),Lab,30.5,49.2,35.8,53.5
+6,620,Lab Bio Oral (620),Lab,-1.5,39.6,10.1,47.0
+6,621,Kelas 621,Classroom,10.1,39.6,20.0,47.0
+6,622,Kelas 622,Classroom,20.0,39.6,30.0,47.0
+6,623,Kelas 623,Classroom,30.0,39.6,39.7,47.0
+6,006001,Toilet Wanita Lt 6,Toilet,39.7,55.1,46.2,60.0
+6,006002,Toilet Pria Lt 6,Toilet,39.7,52.2,46.2,55.1
+6,006004,Toilet Disable Lt 3,Toilet,39.7,50.0,42.4,52.2
+6,006003,Toilet VIP Lt 6,Toilet,42.4,50.0,46.2,52.2
+6,06001,Lift Barat Lt 6,Lift,46.2,53.2,49.2,57.7
+6,06002,Lift Timur Lt 6,Lift,54.3,50.0,58.0,57.7
+6,06004,Tangga Utara Lt 6,Stairs,58.0,50.0,60.3,57.7
+6,0006001,Pantry Lt 6,Pantry,57.5,57.7,60.3,60.0
+6,608,Lab IMTKG (608),Lab,60.3,50.0,69.9,60.0
+6,609,Kelas FKG (609),Classroom,69.9,50.0,78.9,60.0
+6,610,Collaboration & Global Engagement (610),Office,78.9,50.0,88.9,60.0
+6,611,Teaching & Learning Innovation Center (611),Office,88.9,50.0,96.1,60.0
+6,06005,Tangga Timur Lt 6,Stairs,96.1,50.0,99.45,60.0
+6,615002,Ruang Wakil Dekan FKG 1 (615B),LecturerRoom,60.3,42.4,63.0,47.0
+6,615003,Ruang Wakil Dekan FKG 2 (615C),LecturerRoom,63.0,42.4,65.6,47.0
+6,615004,Ruang Wakil Dekan FKG 3 (615D),LecturerRoom,65.6,42.4,68.2,47.0
+6,614,Ruang Dosen FKG (614),LecturerRoom,68.2,39.6,78.9,47.0
+6,613,Kelas 613,Classroom,78.9,39.6,89.3,47.0
+6,612,Ruang UKM (612),Storage,89.3,39.6,99.45,47.0
+6,625,Kelas 625,Classroom,39.7,39.6,43.9,46.4
+6,626001,Storage (626A),Storage,43.9,43.7,50.5,46.4
+6,626002,Ruang DEU (626B),Office,43.9,39.6,50.5,43.7
+6,627,Kelas 627,Classroom,39.7,37.6,50.5,39.6
+6,607,LPPM (607),Office,39.7,21.7,50.5,37.6
+6,606,Kelas FKG (606),Classroom,39.7,12.2,50.5,21.7
+6,605,Skill Lab (605),Lab,39.7,2.6,50.5,12.2
+6,601,Academic Support FKG (601),Office,54.3,40.9,57.3,47.0
+6,615001,Ruang Dekan FKG (615A),LecturerRoom,57.3,42.4,60.3,47.0
+6,601001,Ruang Meeting (601A),MeetingRoom,54.3,37.9,57.3,40.9
+6,615005,Ruang Dekan FKG (615E),LecturerRoom,57.3,37.9,60.3,40.9
+6,602001,Ruang Monitor (602A),Lab,54.3,36.2,58.3,37.9
+6,602002,Gudang (602B),Storage,58.3,36.2,60.3,37.9
+6,602,Lab Psychology (602),Lab,54.3,26.0,60.3,36.2
+6,603,Lab Psychology (603),Lab,54.3,13.7,60.3,26.0
+6,604,Kelas FKG (604),Classroom,54.3,5.5,60.3,13.7
+6,06006,Tangga Selatan Lt 6,Stairs,54.3,2.6,60.3,5.5
