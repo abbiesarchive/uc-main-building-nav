@@ -17,12 +17,12 @@ START = (50, 55)
 
 # Lift dan tangga pada Lantai 3.
 LINKS = {
-    "03001": {"up": "5", "down": "2", "cost": 10},  # Lift Barat -> Lt. 5 / Lt. 2
+    "03001": {"up": "5", "down": "2A", "cost": 10},  # Lift Barat -> Lt. 5 / Lt. 2
     "03002": {},  # Lift Timur tidak akses Lt. 3
-    "03003": {"up": "4", "down": "2", "cost": 20},  # Tangga Barat
-    "03004": {"up": "4", "down": "2", "cost": 20},  # Tangga Utara
-    "03005": {"up": "4", "down": "2", "cost": 20},  # Tangga Timur
-    "03006": {"up": "4", "down": "2", "cost": 20},  # Tangga Selatan
+    "03003": {"up": "4", "down": "2A", "cost": 20},  # Tangga Barat
+    "03004": {"up": "4", "down": "2A", "cost": 20},  # Tangga Utara
+    "03005": {"up": "4", "down": "2A", "cost": 20},  # Tangga Timur
+    "03006": {"up": "4", "down": "2A", "cost": 20},  # Tangga Selatan
 }
 
 # Gambar denah untuk overlay.
