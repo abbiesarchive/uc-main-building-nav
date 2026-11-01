@@ -1,14 +1,33 @@
-"""A* Pathfinding and Room Search for Indoor Navigation."""
+"""A* route search for the indoor map: ONE search over all floors.
+
+Graph:
+  node  = (floor, x, y) on a 1 m grid (x, y are whole meters)
+  edge  = one step W / A / S / D (4 directions), cost 1 m, only onto walkable cells
+        + standing in a stair or lift, move to the same (x, y) on the floor in LINKS
+          ("up" / "down"), cost = the "cost" in LINKS (a team assumption, not measured)
+
+Heuristic (never overestimates, and consistent): the larger of
+  - Manhattan distance to the target room, minus 1.5 m (stairs keep x, y, so only walking closes this gap)
+  - the cheapest total stair/lift cost from this floor to the target floor
+"""
 import heapq
 import math
+
+import numpy as np
+import shapely
+from functools import lru_cache
 from shapely.geometry import LineString, Point
-from shapely.ops import unary_union
-from map_data import is_walkable, load_rooms, LINK_TYPES
-from floors import load_all, get_floor
+
+from floors import get_floor, load_all
+from map_data import LINK_TYPES, load_rooms, walkable_area
+
+MOVES = [(0, 1), (0, -1), (1, 0), (-1, 0)]    # W, S, D, A
+LINK_ROOM_STEP_COST = 3     # stepping into a stair/lift you do not use costs more, so routes do not cut through them
+GOAL_REACH = 1.0            # a closed room is reached when you stand within 1 m of its wall (doors are not modeled)
 
 
 def get_all_rooms():
-    """Mengambil seluruh ruangan dari seluruh lantai yang terpetakan."""
+    """Every room of every mapped floor, each with its floor."""
     all_rooms = []
     for f in load_all():
         for r in load_rooms(f):
@@ -17,119 +36,8 @@ def get_all_rooms():
 
 
 def get_room_center(room):
-    """Mendapatkan titik koordinat tepat di ruangan / lift / tangga."""
     c = room["polygon"].centroid
     return (round(c.x, 1), round(c.y, 1))
-
-
-def heuristic(p1, p2):
-    """Fungsi heuristik A* menggunakan jarak Euclidean (admissible dan konsisten)."""
-    return math.hypot(p1[0] - p2[0], p1[1] - p2[1])
-
-
-def astar_to_room(floor, start, target_room):
-    """Algoritma A* menuju tepat ke ruangan / lift / tangga melewati koridor tanpa memotong lift/tangga/ruangan lain."""
-    rooms = load_rooms(floor)
-    poly = target_room["polygon"]
-    goal = get_room_center(target_room)
-
-    start_pt_geom = Point(*start)
-    start_room = next((r for r in rooms if r["polygon"].covers(start_pt_geom)), None)
-
-    # Ruangan/lift/tangga yang dilarang dipotong: semua ruangan KECUALI target_room, Lounge, dan start_room
-    blocked = [r["polygon"] for r in rooms 
-               if r["room_id"] != target_room["room_id"] 
-               and r["type"] != "Lounge" 
-               and (not start_room or r["room_id"] != start_room["room_id"])]
-    blocked_union = unary_union(blocked) if blocked else None
-
-    def can_pass(x, y):
-        if not is_walkable(floor, x, y):
-            return False
-        if blocked_union and blocked_union.covers(Point(x, y)):
-            return False
-        return True
-
-    if target_room["type"] == "Lounge" or target_room["type"] in LINK_TYPES:
-        entry = (round(goal[0]), round(goal[1]))
-    else:
-        xmin, ymin, xmax, ymax = poly.bounds
-        candidates = []
-        for dist in (1, 2, 3, 5):
-            for x in range(int(xmin) - dist, int(xmax) + dist + 1):
-                for y in (int(ymin) - dist, int(ymax) + dist):
-                    if can_pass(x, y):
-                        candidates.append((x, y))
-            for y in range(int(ymin) - dist, int(ymax) + dist + 1):
-                for x in (int(xmin) - dist, int(xmax) + dist):
-                    if can_pass(x, y):
-                        candidates.append((x, y))
-            if candidates:
-                break
-        candidates.sort(key=lambda p: math.hypot(p[0] - goal[0], p[1] - goal[1]))
-        entry = candidates[0] if candidates else (round(start[0]), round(start[1]))
-
-    sx, sy = round(start[0]), round(start[1])
-    start_pt = (sx, sy)
-    dirs = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
-
-    # Inisialisasi struktur data A* standar:
-    # open_set   : Priority queue menyimpan tuple (f_score, g_score, node)
-    # came_from  : Map penelusuran balik (parent pointer) untuk rekonstruksi rute optimal
-    # g_score    : Biaya aktual terkecil dari start ke setiap node (g(n))
-    # f_score    : Estimasi total biaya f(n) = g(n) + h(n)
-    # closed_set : Node yang sudah dievaluasi optimal
-    open_set = []
-    came_from = {}
-    g_score = {start_pt: 0.0}
-    f_score = {start_pt: heuristic(start_pt, entry)}
-    heapq.heappush(open_set, (f_score[start_pt], 0.0, start_pt))
-    closed_set = set()
-
-    while open_set:
-        current_f, current_g, current = heapq.heappop(open_set)
-
-        if current in closed_set:
-            continue
-        closed_set.add(current)
-
-        # Evaluasi apakah sudah mencapai radius target/entry (toleransi 1.2 m)
-        if heuristic(current, entry) <= 1.2:
-            # Rekonstruksi rute optimal dari came_from
-            curr = current
-            path = [curr]
-            while curr in came_from:
-                curr = came_from[curr]
-                path.append(curr)
-            path.reverse()
-
-            full_path = [start] + path[1:] + [entry, goal]
-            cleaned = [full_path[0]]
-            for p in full_path[1:]:
-                if p != cleaned[-1]:
-                    cleaned.append(p)
-            return LineString(cleaned)
-
-        for dx, dy in dirs:
-            nx, ny = current[0] + dx, current[1] + dy
-            neighbor = (nx, ny)
-
-            if neighbor in closed_set:
-                continue
-
-            if can_pass(nx, ny):
-                step_cost = math.hypot(dx, dy)
-                tentative_g = current_g + step_cost
-
-                if tentative_g < g_score.get(neighbor, float("inf")):
-                    came_from[neighbor] = current
-                    g_score[neighbor] = tentative_g
-                    h = heuristic(neighbor, entry)
-                    f = tentative_g + h
-                    f_score[neighbor] = f
-                    heapq.heappush(open_set, (f, tentative_g, neighbor))
-
-    return LineString([start, goal])
 
 
 def going_up(current_floor, target_floor):
@@ -137,9 +45,38 @@ def going_up(current_floor, target_floor):
     return get_floor(target_floor).LEVEL > get_floor(current_floor).LEVEL
 
 
+# ---------------------------------------------------------------- the grid
+
+def _cells_in(geometry):
+    """Whole-meter cells (x, y) covered by a shapely geometry."""
+    xmin, ymin, xmax, ymax = geometry.bounds
+    xs, ys = np.meshgrid(np.arange(math.floor(xmin), math.ceil(xmax) + 1),
+                         np.arange(math.floor(ymin), math.ceil(ymax) + 1))
+    xs, ys = xs.ravel(), ys.ravel()
+    inside = shapely.covers(geometry, shapely.points(xs, ys))
+    return {(int(x), int(y)) for x, y in zip(xs[inside], ys[inside])}
+
+
+@lru_cache
+def walkable_cells(floor):
+    """Cells where the dot can stand (the same rule as map_data.walkable_area)."""
+    return frozenset(_cells_in(walkable_area(floor)))
+
+
+@lru_cache
+def link_cells(floor):
+    """{cell: [stair/lift room, ...]} for every stair and lift on the floor."""
+    cells = {}
+    for room in load_rooms(floor):
+        if room["type"] in LINK_TYPES:
+            for cell in _cells_in(room["polygon"]):
+                cells.setdefault(cell, []).append(room)
+    return cells
+
+
+@lru_cache
 def floor_cost(start_floor, target_floor):
-    """Cheapest stair/lift cost to get from one floor to another, or None if there is no way.
-    Dijkstra over floors; every LINKS entry is an edge (cost = its "cost")."""
+    """Cheapest stair/lift cost between two floors, ignoring walking. None if there is no way."""
     best = {start_floor: 0.0}
     queue = [(0.0, start_floor)]
     while queue:
@@ -160,82 +97,156 @@ def floor_cost(start_floor, target_floor):
     return None
 
 
-def find_route(current_floor, start_pos, target_room):
-    """Menghitung rute optimal tepat ke ruangan atau lift/tangga yang sesuai jalannya."""
-    target_floor = str(target_room["floor"])
+# ---------------------------------------------------------------- A*
 
-    # 1. Ruangan berada di lantai yang sama -> langsung ke ruangan
-    if target_floor == current_floor:
-        line = astar_to_room(current_floor, start_pos, target_room)
+def astar(start_floor, start, target_room):
+    """Cheapest list of nodes [(floor, x, y), ...] from start to the target room, or None."""
+    target_floor = target_room["floor"]
+    poly = target_room["polygon"]
+    txmin, tymin, txmax, tymax = poly.bounds
+    goal_cells = {c for c in walkable_cells(target_floor) if poly.distance(Point(c)) <= GOAL_REACH}
+    if not goal_cells:
+        return None
+
+    def heuristic(node):
+        floor, x, y = node
+        dx = max(txmin - x, 0, x - txmax)
+        dy = max(tymin - y, 0, y - tymax)
+        walk = max(dx + dy - 1.5, 0)                # x, y only change by walking, on any floor
+        return max(walk, floor_cost(floor, target_floor))   # never None: such moves are not pushed
+
+    start_node = (start_floor, round(start[0]), round(start[1]))
+    if floor_cost(start_floor, target_floor) is None:
+        return None
+
+    g_score = {start_node: 0.0}
+    came_from = {}
+    counter = 0
+    queue = [(heuristic(start_node), 0, start_node)]
+    closed = set()
+    while queue:
+        _, _, node = heapq.heappop(queue)
+        if node in closed:
+            continue
+        closed.add(node)
+        floor, x, y = node
+
+        if floor == target_floor and (x, y) in goal_cells:
+            path = [node]
+            while node in came_from:
+                node = came_from[node]
+                path.append(node)
+            return path[::-1]
+
+        neighbours = []
+        here_walkable = walkable_cells(floor)
+        links_here = link_cells(floor)
+        for dx, dy in MOVES:                          # W / A / S / D
+            cell = (x + dx, y + dy)
+            if cell in here_walkable:
+                cost = 1
+                if cell in links_here and not (floor == target_floor and cell in goal_cells):
+                    cost += LINK_ROOM_STEP_COST
+                neighbours.append(((floor, cell[0], cell[1]), cost))
+        for room in links_here.get((x, y), []):       # stair / lift: change floor
+            links = get_floor(floor).LINKS.get(room["room_id"], {})
+            for direction in ("up", "down"):
+                nxt = links.get(direction)
+                if nxt is None or nxt not in load_all() or (x, y) not in walkable_cells(nxt):
+                    continue
+                if floor_cost(nxt, target_floor) is None:
+                    continue
+                neighbours.append(((nxt, x, y), links.get("cost", 0)))
+
+        for neighbour, cost in neighbours:
+            new_g = g_score[node] + cost
+            if neighbour not in closed and new_g < g_score.get(neighbour, float("inf")):
+                g_score[neighbour] = new_g
+                came_from[neighbour] = node
+                counter += 1
+                heapq.heappush(queue, (new_g + heuristic(neighbour), counter, neighbour))
+    return None
+
+
+_last = {"key": None, "path": None}
+
+
+def _search(current_floor, start_pos, target_room):
+    """astar() with a one-entry cache (the app asks twice per redraw)."""
+    key = (current_floor, round(start_pos[0]), round(start_pos[1]), target_room["floor"], target_room["room_id"])
+    if _last["key"] != key:
+        _last["key"] = key
+        _last["path"] = astar(current_floor, start_pos, target_room)
+    return _last["path"]
+
+
+# ---------------------------------------------------------------- results for the app
+
+def plan(current_floor, start_pos, target_room):
+    """The part of the route on the current floor.
+    Returns (line, link_room, next_floor, floors): link_room / next_floor are None when the
+    target is on this floor; floors lists every floor of the whole route in order."""
+    goal = get_room_center(target_room)
+    path = _search(current_floor, start_pos, target_room)
+    if path is None:
+        return LineString([start_pos, goal]), None, None, [current_floor, target_room["floor"]]
+
+    floors = [path[0][0]]
+    for node in path:
+        if node[0] != floors[-1]:
+            floors.append(node[0])
+
+    here = [(x, y) for floor, x, y in path[:next((i for i, n in enumerate(path) if n[0] != current_floor), len(path))]]
+    if len(here) < len(path):                          # the route changes floor
+        next_floor = path[len(here)][0]
+        x, y = here[-1]
+        link = next(r for r in link_cells(current_floor)[(x, y)]
+                    if get_floor(current_floor).LINKS.get(r["room_id"], {}).get("up") == next_floor
+                    or get_floor(current_floor).LINKS.get(r["room_id"], {}).get("down") == next_floor)
+        points = [tuple(start_pos)] + here
+        return LineString(points if len(points) > 1 else points * 2), link, next_floor, floors
+
+    points = [tuple(start_pos)] + here + [goal]
+    return LineString(points), None, None, floors
+
+
+def find_route(current_floor, start_pos, target_room):
+    """(line on the current floor, info text, stair/lift to use or the target room)."""
+    line, link, next_floor, floors = plan(current_floor, start_pos, target_room)
+    target_floor = str(target_room["floor"])
+    if link is None:
         info = f"Rute menuju ruangan {target_room['name']} ({line.length:.1f} m)"
         return line, info, target_room
-
-    # 2. Ruangan di lantai lain -> pakai lift/tangga yang benar-benar menuju lantai tujuan
-    #    (langsung atau lewat lantai lain). Pilih yang total biayanya paling kecil:
-    #    jarak jalan + biaya lift/tangga + biaya sisa perjalanan antar lantai.
-    settings = get_floor(current_floor)
-    stair_lift_rooms = [r for r in load_rooms(current_floor) if r["type"] in LINK_TYPES]
-    up_needed = going_up(current_floor, target_floor)
-
-    candidates = []
-    for r in stair_lift_rooms:
-        links = settings.LINKS.get(r["room_id"], {})
-        step = links.get("up" if up_needed else "down")
-        if step is None:
-            continue
-        rest = floor_cost(step, target_floor)
-        if rest is None:
-            continue   # dari lantai itu tidak bisa sampai ke lantai tujuan
-        c = r["polygon"].centroid
-        dist = math.hypot(start_pos[0] - c.x, start_pos[1] - c.y)
-        candidates.append((r, dist + links.get("cost", 0) + rest))
-
-    if not candidates:
-        for r in stair_lift_rooms:
-            c = r["polygon"].centroid
-            candidates.append((r, math.hypot(start_pos[0] - c.x, start_pos[1] - c.y)))
-
-    candidates.sort(key=lambda c: c[1])
-    best_link, _ = candidates[0]
-    line = astar_to_room(current_floor, start_pos, best_link)
-    arah = "naik" if up_needed else "turun"
-    next_floor = settings.LINKS.get(best_link["room_id"], {}).get("up" if up_needed else "down", target_floor)
-    info = f"Menuju {best_link['name']} untuk {arah} ke Lantai {next_floor} (Tujuan: {target_room['name']} di Lantai {target_floor})"
-    return line, info, best_link
+    arah = "naik" if going_up(current_floor, next_floor) else "turun"
+    jalur = " → ".join(f"Lt. {f}" for f in floors)
+    info = (f"Menuju {link['name']} untuk {arah} ke Lantai {next_floor} "
+            f"(Tujuan: {target_room['name']} di Lantai {target_floor}; jalur {jalur})")
+    return line, info, link
 
 
 def get_current_instruction(current_floor, pos, target_room):
-    """Menghasilkan 1 arahan langkah aktif tepat menuju ruangan atau lift/tangga jalannya."""
+    """One text instruction for what to do now."""
     target_floor = str(target_room["floor"])
-    line, info, dest = find_route(current_floor, pos, target_room)
+    line, link, next_floor, _ = plan(current_floor, pos, target_room)
 
-    # Kasus lantai yang sama
-    if target_floor == current_floor:
+    if link is None:
         if line.length < 1.5:
             return f"🎉 Anda telah sampai di ruangan {target_room['name']}!"
-        pts = list(line.simplify(1.2).coords)
-        if len(pts) <= 2:
-            return f"Lurus sejauh {round(line.length)} m menuju ruangan {target_room['name']}"
-
-        d_turn = math.hypot(pts[1][0] - pos[0], pts[1][1] - pos[1])
-        v1 = (pts[1][0] - pts[0][0], pts[1][1] - pts[0][1])
-        v2 = (pts[2][0] - pts[1][0], pts[2][1] - pts[1][1])
-        cross = v1[0] * v2[1] - v1[1] * v2[0]
-        turn = "belok kiri" if cross > 0 else "belok kanan"
-        return f"Lurus sejauh {round(d_turn)} m, lalu {turn} menuju ruangan {target_room['name']}"
+        goal_name = f"ruangan {target_room['name']}"
+        arah_text = ""
     else:
-        # Kasus beda lantai: menuju lift atau tangga yang memang jalannya
-        up = going_up(current_floor, target_floor)
-        arah = "naik" if up else "turun"
-        next_floor = get_floor(current_floor).LINKS.get(dest["room_id"], {}).get("up" if up else "down", target_floor)
+        arah = "naik" if going_up(current_floor, next_floor) else "turun"
+        goal_name = link["name"]
+        arah_text = f" untuk {arah} ke Lt. {next_floor}"
         if line.length < 2.0:
-            return f"Gunakan {dest['name']} untuk {arah} ke Lantai {next_floor} (Tujuan: {target_room['name']} di Lantai {target_floor})"
-        pts = list(line.simplify(1.2).coords)
-        if len(pts) <= 2:
-            return f"Lurus sejauh {round(line.length)} m menuju {dest['name']} untuk {arah} ke Lt. {next_floor}"
-        d_turn = math.hypot(pts[1][0] - pos[0], pts[1][1] - pos[1])
-        v1 = (pts[1][0] - pts[0][0], pts[1][1] - pts[0][1])
-        v2 = (pts[2][0] - pts[1][0], pts[2][1] - pts[1][1])
-        cross = v1[0] * v2[1] - v1[1] * v2[0]
-        turn = "belok kiri" if cross > 0 else "belok kanan"
-        return f"Lurus sejauh {round(d_turn)} m, lalu {turn} menuju {dest['name']} ({arah} ke Lt. {next_floor})"
+            return (f"Gunakan {link['name']} untuk {arah} ke Lantai {next_floor} "
+                    f"(Tujuan: {target_room['name']} di Lantai {target_floor})")
+
+    pts = list(line.simplify(1.2).coords)
+    if len(pts) <= 2:
+        return f"Lurus sejauh {round(line.length)} m menuju {goal_name}{arah_text}"
+    d_turn = math.hypot(pts[1][0] - pos[0], pts[1][1] - pos[1])
+    v1 = (pts[1][0] - pts[0][0], pts[1][1] - pts[0][1])
+    v2 = (pts[2][0] - pts[1][0], pts[2][1] - pts[1][1])
+    turn = "belok kiri" if v1[0] * v2[1] - v1[1] * v2[0] > 0 else "belok kanan"
+    return f"Lurus sejauh {round(d_turn)} m, lalu {turn} menuju {goal_name}{arah_text}"
