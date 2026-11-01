@@ -2,6 +2,7 @@
 import heapq
 import math
 from shapely.geometry import LineString, Point
+from shapely.ops import unary_union
 from map_data import is_walkable, load_rooms, LINK_TYPES
 from floors import load_all, get_floor
 
@@ -22,16 +23,29 @@ def get_room_center(room):
 
 
 def astar_to_room(floor, start, target_room):
-    """Algoritma A* menuju tepat ke ruangan / lift / tangga melewati koridor."""
+    """Algoritma A* menuju tepat ke ruangan / lift / tangga melewati koridor tanpa memotong lift/tangga/ruangan lain."""
+    rooms = load_rooms(floor)
     poly = target_room["polygon"]
     goal = get_room_center(target_room)
 
-    sx, sy = round(start[0]), round(start[1])
-    start_pt = (sx, sy)
+    start_pt_geom = Point(*start)
+    start_room = next((r for r in rooms if r["polygon"].covers(start_pt_geom)), None)
 
-    # Jika ruangan bisa dilewati (lift, tangga, lounge), cari langsung ke goal
-    # Jika ruangan tertutup, cari titik koridor terdekat dari goal untuk pintu masuk
-    if is_walkable(floor, goal[0], goal[1]):
+    # Ruangan/lift/tangga yang dilarang dipotong: semua ruangan KECUALI target_room, Lounge, dan start_room
+    blocked = [r["polygon"] for r in rooms 
+               if r["room_id"] != target_room["room_id"] 
+               and r["type"] != "Lounge" 
+               and (not start_room or r["room_id"] != start_room["room_id"])]
+    blocked_union = unary_union(blocked) if blocked else None
+
+    def can_pass(x, y):
+        if not is_walkable(floor, x, y):
+            return False
+        if blocked_union and blocked_union.covers(Point(x, y)):
+            return False
+        return True
+
+    if target_room["type"] == "Lounge" or target_room["type"] in LINK_TYPES:
         entry = (round(goal[0]), round(goal[1]))
     else:
         xmin, ymin, xmax, ymax = poly.bounds
@@ -39,17 +53,19 @@ def astar_to_room(floor, start, target_room):
         for dist in (1, 2, 3, 5):
             for x in range(int(xmin) - dist, int(xmax) + dist + 1):
                 for y in (int(ymin) - dist, int(ymax) + dist):
-                    if is_walkable(floor, x, y):
+                    if can_pass(x, y):
                         candidates.append((x, y))
             for y in range(int(ymin) - dist, int(ymax) + dist + 1):
                 for x in (int(xmin) - dist, int(xmax) + dist):
-                    if is_walkable(floor, x, y):
+                    if can_pass(x, y):
                         candidates.append((x, y))
             if candidates:
                 break
         candidates.sort(key=lambda p: math.hypot(p[0] - goal[0], p[1] - goal[1]))
-        entry = candidates[0] if candidates else start_pt
+        entry = candidates[0] if candidates else (round(start[0]), round(start[1]))
 
+    sx, sy = round(start[0]), round(start[1])
+    start_pt = (sx, sy)
     dirs = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
     queue = [(0, 0, start_pt, [start_pt])]
     visited = {start_pt: 0}
@@ -66,7 +82,7 @@ def astar_to_room(floor, start, target_room):
 
         for dx, dy in dirs:
             nx, ny = current[0] + dx, current[1] + dy
-            if is_walkable(floor, nx, ny):
+            if can_pass(nx, ny):
                 step_cost = math.hypot(dx, dy)
                 new_cost = cost + step_cost
                 neighbor = (nx, ny)
