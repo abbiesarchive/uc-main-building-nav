@@ -1,0 +1,33 @@
+floor,room_id,name,type,xmin,ymin,xmax,ymax
+5,05003,Tangga Barat Lt 5,Stairs,0.0,50.0,2.8,60.0
+5,517,Lab Histologi & PA (517),Lab,2.8,50.0,13.3,60.0
+5,516,Lab Histologi & PA (516),Lab,13.3,50.0,25.6,60.0
+5,515,Kelas 515,Classroom,25.6,50.0,39.7,60.0
+5,518,Lab Faal & Farmakologi (518),Lab,-1.5,39.5,19.9,47.0
+5,519,Kelas 519,Classroom,19.9,39.5,39.7,47.0
+5,005001,Toilet Wanita Lt 5,Toilet,39.7,55.1,46.2,60.0
+5,005002,Toilet Pria Lt 5,Toilet,39.7,52.2,46.2,55.1
+5,005004,Toilet Disable Lt 5,Toilet,39.7,50.0,42.4,52.2
+5,005003,Toilet VIP Lt 5,Toilet,42.4,50.0,46.2,52.2
+5,05001,Lift Barat Lt 5,Lift,46.2,53.2,49.2,57.7
+5,05002,Lift Timur Lt 5,Lift,54.3,50.0,58.0,57.7
+5,05004,Tangga Utara Lt 5,Stairs,58.0,50.0,60.3,57.7
+5,0005001,Pantry Lt 5,Pantry,57.5,57.7,60.3,60.0
+5,507,Studio 1 (507),Classroom,60.3,50.0,74.1,60.0
+5,508,Studio 2 (508),Classroom,74.1,50.0,89.2,60.0
+5,509,QWERTY (509),Theater,89.2,50.0,96.1,60.0
+5,05005,Tangga Timur Lt 5,Stairs,96.1,50.0,99.45,60.0
+5,513,Lounge SIFT (513),Lounge,60.3,40.4,68.8,47.0
+5,512,EUREKA (512),MeetingRoom,68.8,40.4,74.9,47.0
+5,511,AHA (511),MeetingRoom,74.9,40.4,78.9,47.0
+5,510,SIFT Colab Space (510),Lounge,78.9,39.5,99.45,47.0
+5,506,DSAIRC (506),ServerRoom,39.7,35.6,50.5,46.2
+5,505002,Kelas 505B,Classroom,39.7,26.0,50.5,35.6
+5,505001,Kelas 505A,Classroom,39.7,16.4,50.5,26.0
+5,504,Kelas 504,Classroom,39.7,0.0,50.5,16.4
+5,501,Academic Support SIFT (501),Office,54.3,40.4,60.3,47.0
+5,502001,Ruang Kaprodi IMT (502A),LecturerRoom,54.3,37.1,60.3,40.4
+5,502002,Ruang Dekan SIFT (502B),LecturerRoom,54.3,34.0,60.3,37.1
+5,502003,Ruang Kaprodi ISB (502C),LecturerRoom,54.3,30.8,60.3,34.0
+5,503,Ruang Dosen SIFT (503),LecturerRoom,54.3,4.6,60.3,30.8
+5,05006,Tangga Selatan Lt 5,Stairs,54.3,0.0,60.3,4.6

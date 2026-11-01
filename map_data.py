@@ -30,15 +30,25 @@ def voids(floor):
     return [box(*rect) for rect in get_floor(floor).VOIDS]
 
 
+def read_csv(path):
+    df = pd.read_csv(path, dtype={"floor": str, "room_id": str})
+    df.columns = df.columns.str.strip()
+    return df
+
+
 def load_rooms(floor, csv_path=None):
     """Return a list of dicts: room_id, name, type, polygon."""
-    csv_path = csv_path or ROOT / get_floor(floor).ROOMS_CSV
-    df = pd.read_csv(csv_path, dtype={"floor": str, "room_id": str})
-    df.columns = df.columns.str.strip()
-    df = df[df["floor"] == floor]
+    settings = get_floor(floor)
+    df = read_csv(csv_path or ROOT / settings.ROOMS_CSV)
+    parts = [df[df["floor"] == floor]]
+    # rooms shared with another floor (the Lt. 2 / 2A core) are stored once, there
+    for other, ids in settings.SHARED.items():
+        other_df = read_csv(ROOT / get_floor(other).ROOMS_CSV)
+        parts.append(other_df[other_df["room_id"].isin(ids)])
+    rows = pd.concat(parts)
     return [{"room_id": r.room_id, "name": r.name, "type": r.type,
              "polygon": box(r.xmin, r.ymin, r.xmax, r.ymax)}
-            for r in df.itertuples()]
+            for r in rows.itertuples()]
 
 
 def free_rectangles(rooms, floor):
@@ -94,12 +104,21 @@ def build_walkable(floor, rooms):
                       "part_of": owner, "polygon": box(x0, y0, x1, y1)})
     return areas
 
+
+@lru_cache
 def walkable_area(floor):
-    """Every room is walkable for now, so the walkable area is the outline
-    minus the voids."""
+    """Where the dot can stand: the outline minus the voids. Unless a floor sets
+    ROOMS_WALKABLE = True, also minus every room except stairs, lifts, Lounges and
+    the rooms listed in OPEN_ROOMS. Each blocked room is grown by 1 cm so its wall
+    line is blocked too (otherwise the dot could walk along the wall)."""
+    settings = get_floor(floor)
     area = building(floor)
     for void in voids(floor):
         area = area.difference(void)
+    if not settings.ROOMS_WALKABLE:
+        for room in load_rooms(floor):
+            if room["type"] not in LINK_TYPES and room["type"] != "Lounge" and room["room_id"] not in settings.OPEN_ROOMS:
+                area = area.difference(room["polygon"].buffer(0.01, join_style="mitre"))
     return area
 
 # def walkable_area(floor):

@@ -9,31 +9,22 @@ ROOMS_CSV = "csv/lantai4.csv"
 OUTLINE = [
     (0, 47.62, 96, 50),
     (0, 40, 96, 60),      
+    (96, 50, 99.45, 60),   # Tangga Timur at the east end
     (40, 0, 60, 40),      
-]
-
-# Area yang tidak bisa dilewati 
-VOIDS = [
-    # (0, 40, 50, 47.62)
 ]
 
 # Titik awal user 
 START = (50, 55)
 
-# Patch tambahan untuk ruangan yang berbentuk tidak sederhana.
-# (Belum diperlukan berdasarkan data CSV saat ini.)
-PART_OF = {}
-
 # Lift dan tangga pada Lantai 4.
 LINKS = {
-    "04001": {"up": "5", "down": "3", "cost": 10},  # Lift Barat
-    "04002": {"up": "5", "down": "3", "cost": 10},  # Lift Timur
+    "04001": {},  # Lift Barat tidak akses Lt. 4
+    "04002": {"up": "6", "down": "2", "cost": 10},  # Lift Timur -> Lt. 7 / Lt. 2
     "04003": {"up": "5", "down": "3", "cost": 20},  # Tangga Barat
     "04004": {"up": "5", "down": "3", "cost": 20},  # Tangga Utara
     "04005": {"up": "5", "down": "3", "cost": 20},  # Tangga Timur
     "04006": {"up": "5", "down": "3", "cost": 20},  # Tangga Selatan
 }
-
 
 # Gambar denah untuk overlay.
 IMAGE = "denah/lantai4.jpeg"

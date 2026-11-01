@@ -43,7 +43,7 @@ class Navigator:
         """Step one meter. Returns a message, or "" when the step worked."""
         nx, ny = self.x + dx * STEP, self.y + dy * STEP
         if not is_walkable(self.floor, nx, ny):
-            return "Blocked: that is the void or outside the building."
+            return "Blocked: that is a closed room, the void or outside the building."
         self.x, self.y = nx, ny
         self.trail.append((nx, ny))
         return ""
@@ -53,18 +53,39 @@ class Navigator:
         room = self.here()
         if room is None or room["type"] not in LINK_TYPES:
             return None, None
-        return room, self.settings[self.floor].LINKS.get(room["room_id"])
+        return room, self.settings[self.floor].LINKS.get(room["room_id"], {})
 
     def change_floor(self, up):
         """Use the stair or lift the user stands in. up=True goes up one level."""
         room, links = self.link()
         if room is None:
             return "Stand inside a stair or lift first, then press E (up) or Q (down)."
-        if links is None:
-            return f"{room['name']} has no floor link yet (add it to LINKS in the floor file)."
+
+        # Validasi khusus Lift Barat vs Lift Timur
+        if room["type"] == "Lift":
+            is_barat = "Barat" in room["name"] or room["room_id"].endswith("001")
+            is_timur = "Timur" in room["name"] or room["room_id"].endswith("002")
+            if is_barat and self.floor in ("4", "6"):
+                return "Gunakan lift timur untuk mengakses lantai 4 dan 6"
+            if is_timur and self.floor in ("3", "5"):
+                return "Gunakan lift barat untuk mengakses lantai 3 dan 5"
+
+        if not links:
+            if room["type"] == "Lift":
+                is_barat = "Barat" in room["name"] or room["room_id"].endswith("001")
+                return "Gunakan lift timur untuk mengakses lantai 4 dan 6" if is_barat else "Gunakan lift barat untuk mengakses lantai 3 dan 5"
+            return f"{room['name']} has no floor link yet."
+
         target = links.get("up" if up else "down")
         if target is None:
+            if room["type"] == "Lift":
+                is_barat = "Barat" in room["name"] or room["room_id"].endswith("001")
+                if is_barat and self.floor not in ("7", "1"):
+                    return "Gunakan lift timur untuk mengakses lantai 4 dan 6"
+                if not is_barat and self.floor not in ("7", "1"):
+                    return "Gunakan lift barat untuk mengakses lantai 3 dan 5"
             return f"{room['name']} does not go {'up' if up else 'down'} from Lt. {self.floor}."
+
         if target not in self.floors:
             return f"Lt. {target} is not mapped yet (no file for it in floors/)."
         self.floor = target
@@ -74,6 +95,15 @@ class Navigator:
     def link_hint(self):
         """Text that tells the user where the stair or lift they stand in goes."""
         room, links = self.link()
+        if not room:
+            return ""
+        if room["type"] == "Lift":
+            is_barat = "Barat" in room["name"] or room["room_id"].endswith("001")
+            is_timur = "Timur" in room["name"] or room["room_id"].endswith("002")
+            if is_barat and self.floor in ("4", "6"):
+                return f"{room['name']}: Gunakan lift timur untuk mengakses lantai 4 dan 6"
+            if is_timur and self.floor in ("3", "5"):
+                return f"{room['name']}: Gunakan lift barat untuk mengakses lantai 3 dan 5"
         if not links:
             return ""
         parts = []

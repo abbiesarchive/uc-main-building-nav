@@ -82,8 +82,10 @@ def check_floor(floor):
         errors.append(f"START {settings.START} is not walkable (outside the outline or in a void)")
     else:
         points = reachable_points(floor)
+        # closed rooms: you only need to reach the wall, and the grid is 1 m
+        reach = 0.5 if settings.ROOMS_WALKABLE else 1.0
         for room in rooms:
-            if not any(room["polygon"].distance(Point(p)) <= 0.5 for p in points):
+            if not any(room["polygon"].distance(Point(p)) <= reach for p in points):
                 errors.append(f"{room['room_id']} {room['name']}: cannot be reached from START")
 
     # links on this floor

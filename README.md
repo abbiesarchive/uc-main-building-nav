@@ -2,7 +2,7 @@
 
 Indoor map of the Universitas Ciputra Main Building. You pick a start, walk with
 WASD or the arrow keys, and the app shows the rooms around you (Buffer) and the rooms
-you walked through (Spatial Join). Route search (BFS / A*) is not built yet.
+you walked through (Spatial Join). Route search uses the A* algorithm with Euclidean heuristic.
 
 ## Read this first: one coordinate system for every floor
 
@@ -30,6 +30,7 @@ pip install -r requirements.txt
 
 ```
 python app.py              walk around (opens a window)
+streamlit run streamlit_app.py   walk around in the browser (buttons)
 python app.py 3            start on Lt. 3
 python check_floors.py     check all floors  (run this before every commit)
 python plot_floor.py 2     draw floor 2 and check it (add "overlay" to lay it on the plan image)
@@ -80,6 +81,6 @@ Say you do Lt. 3:
 | `map_view.py` | draws a floor |
 | `app.py` | the window and the keys |
 | `check_floors.py` | the checks |
-| `pathfinding.py` | route search (empty, to do) |
+| `pathfinding.py` | route search (A* pathfinding and multi-floor routing) |
 
 Project rules, course requirements and open decisions: `CLAUDE.md`.
