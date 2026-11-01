@@ -29,12 +29,12 @@ PART_OF = {
 # "up" / "down" = the floor you arrive on, "cost" = walking penalty for the route search.
 # The other floor's file must have the matching stair going back (check_floors.py tests this).
 LINKS = {
-    "01001": {"up": "2A", "down": None, "cost": 6},   # Lift Barat Lt 1
-    "01002": {"up": "2A", "down": None, "cost": 6},   # Lift Timur Lt 1
-    "01003": {"up": "2A", "down": None, "cost": 10},  # Tangga Barat Lt 1
-    "01004": {"up": "2A", "down": None, "cost": 10},  # Tangga Utara Lt 1
-    "01005": {"up": "2A", "down": None, "cost": 10},  # Tangga Timur Lt 1
-    "01006": {"up": "2A", "down": None, "cost": 10},  # Tangga Selatan Lt 1
+    "01001": {"up": "2", "down": None, "cost": 6},   # Lift Barat Lt 1
+    "01002": {"up": "2", "down": None, "cost": 6},   # Lift Timur Lt 1
+    "01003": {"up": "2", "down": None, "cost": 10},  # Tangga Barat Lt 1
+    "01004": {"up": "2", "down": None, "cost": 10},  # Tangga Utara Lt 1
+    "01005": {"up": "2", "down": None, "cost": 10},  # Tangga Timur Lt 1
+    "01006": {"up": "2", "down": None, "cost": 10},  # Tangga Selatan Lt 1
 }
 
 # Only for the overlay check on the plan image (plot_floor.py ... overlay).
