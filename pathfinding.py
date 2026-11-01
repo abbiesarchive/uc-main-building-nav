@@ -132,6 +132,34 @@ def astar_to_room(floor, start, target_room):
     return LineString([start, goal])
 
 
+def going_up(current_floor, target_floor):
+    """True if the target floor is above the current floor (uses LEVEL, so 2A is between 2 and 3)."""
+    return get_floor(target_floor).LEVEL > get_floor(current_floor).LEVEL
+
+
+def floor_cost(start_floor, target_floor):
+    """Cheapest stair/lift cost to get from one floor to another, or None if there is no way.
+    Dijkstra over floors; every LINKS entry is an edge (cost = its "cost")."""
+    best = {start_floor: 0.0}
+    queue = [(0.0, start_floor)]
+    while queue:
+        cost, floor = heapq.heappop(queue)
+        if floor == target_floor:
+            return cost
+        if cost > best.get(floor, float("inf")):
+            continue
+        for links in get_floor(floor).LINKS.values():
+            for direction in ("up", "down"):
+                nxt = links.get(direction)
+                if nxt is None or nxt not in load_all():
+                    continue
+                new_cost = cost + links.get("cost", 0)
+                if new_cost < best.get(nxt, float("inf")):
+                    best[nxt] = new_cost
+                    heapq.heappush(queue, (new_cost, nxt))
+    return None
+
+
 def find_route(current_floor, start_pos, target_room):
     """Menghitung rute optimal tepat ke ruangan atau lift/tangga yang sesuai jalannya."""
     target_floor = str(target_room["floor"])
@@ -142,35 +170,25 @@ def find_route(current_floor, start_pos, target_room):
         info = f"Rute menuju ruangan {target_room['name']} ({line.length:.1f} m)"
         return line, info, target_room
 
-    # 2. Ruangan di lantai lain -> cari lift atau tangga yang memang jalannya
+    # 2. Ruangan di lantai lain -> pakai lift/tangga yang benar-benar menuju lantai tujuan
+    #    (langsung atau lewat lantai lain). Pilih yang total biayanya paling kecil:
+    #    jarak jalan + biaya lift/tangga + biaya sisa perjalanan antar lantai.
     settings = get_floor(current_floor)
     stair_lift_rooms = [r for r in load_rooms(current_floor) if r["type"] in LINK_TYPES]
-
-    level_current = getattr(settings, "LEVEL", int(current_floor[0]))
-    target_settings = get_floor(target_floor)
-    level_target = getattr(target_settings, "LEVEL", int(target_floor[0]))
-    up_needed = level_target > level_current
+    up_needed = going_up(current_floor, target_floor)
 
     candidates = []
     for r in stair_lift_rooms:
         links = settings.LINKS.get(r["room_id"], {})
-        if up_needed and "up" in links:
-            # Validasi aturan lift barat (1,2,3,5,7) vs lift timur (1,2,4,6,7)
-            if "Barat" in r["name"] and target_floor in ("4", "6"):
-                continue
-            if "Timur" in r["name"] and target_floor in ("3", "5"):
-                continue
-            c = r["polygon"].centroid
-            dist = math.hypot(start_pos[0] - c.x, start_pos[1] - c.y)
-            candidates.append((r, dist))
-        elif not up_needed and "down" in links:
-            if "Barat" in r["name"] and target_floor in ("4", "6"):
-                continue
-            if "Timur" in r["name"] and target_floor in ("3", "5"):
-                continue
-            c = r["polygon"].centroid
-            dist = math.hypot(start_pos[0] - c.x, start_pos[1] - c.y)
-            candidates.append((r, dist))
+        step = links.get("up" if up_needed else "down")
+        if step is None:
+            continue
+        rest = floor_cost(step, target_floor)
+        if rest is None:
+            continue   # dari lantai itu tidak bisa sampai ke lantai tujuan
+        c = r["polygon"].centroid
+        dist = math.hypot(start_pos[0] - c.x, start_pos[1] - c.y)
+        candidates.append((r, dist + links.get("cost", 0) + rest))
 
     if not candidates:
         for r in stair_lift_rooms:
@@ -181,7 +199,8 @@ def find_route(current_floor, start_pos, target_room):
     best_link, _ = candidates[0]
     line = astar_to_room(current_floor, start_pos, best_link)
     arah = "naik" if up_needed else "turun"
-    info = f"Menuju {best_link['name']} untuk {arah} ke Lantai {target_floor} (Tujuan: {target_room['name']})"
+    next_floor = settings.LINKS.get(best_link["room_id"], {}).get("up" if up_needed else "down", target_floor)
+    info = f"Menuju {best_link['name']} untuk {arah} ke Lantai {next_floor} (Tujuan: {target_room['name']} di Lantai {target_floor})"
     return line, info, best_link
 
 
@@ -206,15 +225,17 @@ def get_current_instruction(current_floor, pos, target_room):
         return f"Lurus sejauh {round(d_turn)} m, lalu {turn} menuju ruangan {target_room['name']}"
     else:
         # Kasus beda lantai: menuju lift atau tangga yang memang jalannya
-        arah = "naik" if int(target_floor[0]) > int(current_floor[0]) else "turun"
+        up = going_up(current_floor, target_floor)
+        arah = "naik" if up else "turun"
+        next_floor = get_floor(current_floor).LINKS.get(dest["room_id"], {}).get("up" if up else "down", target_floor)
         if line.length < 2.0:
-            return f"Gunakan {dest['name']} untuk {arah} ke Lantai {target_floor} (Tujuan: {target_room['name']})"
+            return f"Gunakan {dest['name']} untuk {arah} ke Lantai {next_floor} (Tujuan: {target_room['name']} di Lantai {target_floor})"
         pts = list(line.simplify(1.2).coords)
         if len(pts) <= 2:
-            return f"Lurus sejauh {round(line.length)} m menuju {dest['name']} untuk {arah} ke Lt. {target_floor}"
+            return f"Lurus sejauh {round(line.length)} m menuju {dest['name']} untuk {arah} ke Lt. {next_floor}"
         d_turn = math.hypot(pts[1][0] - pos[0], pts[1][1] - pos[1])
         v1 = (pts[1][0] - pts[0][0], pts[1][1] - pts[0][1])
         v2 = (pts[2][0] - pts[1][0], pts[2][1] - pts[1][1])
         cross = v1[0] * v2[1] - v1[1] * v2[0]
         turn = "belok kiri" if cross > 0 else "belok kanan"
-        return f"Lurus sejauh {round(d_turn)} m, lalu {turn} menuju {dest['name']} ({arah} ke Lt. {target_floor})"
+        return f"Lurus sejauh {round(d_turn)} m, lalu {turn} menuju {dest['name']} ({arah} ke Lt. {next_floor})"
