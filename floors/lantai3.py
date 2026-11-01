@@ -1,11 +1,13 @@
 """Lt. 3 settings. Units are meters. Coordinate system: see README.md.
 Sizes are estimates, about +/- 0.5 m."""
 
+# identitas no lt 
 FLOOR = "3"
+# urutan tinggi lantai 
 LEVEL = 3
 ROOMS_CSV = "csv/lantai3.csv"
 
-# Area yang bisa dilewati 
+# Area yang bisa dilewati/batas luar bangunan
 OUTLINE = [
     (0, 47.62, 96, 50),
     (0, 40, 96, 60),      
@@ -13,7 +15,7 @@ OUTLINE = [
     (40, 0, 60, 40),      
 ]
 
-# Titik awal user 
+# Titik awal user pas di lt itu 
 START = (50, 55)
 
 # Lift dan tangga pada Lantai 3.

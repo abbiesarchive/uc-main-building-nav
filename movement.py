@@ -18,7 +18,8 @@ STEP = 1                 # one key press = 1 m
 MIN_RADIUS, MAX_RADIUS = 1, 15
 
 
-class Navigator:
+class Navigator:   
+# set radius default 
     def __init__(self, floor=None, radius=5):
         self.settings = load_all()
         self.floors = {}
@@ -126,12 +127,14 @@ class Navigator:
     def here(self):
         return room_at(self.rooms, self.x, self.y)
 
+# ruangan yang masuk dalam lingkaran buffer 
     def nearby(self):
         """Spatial Join: rooms inside the Buffer, nearest first, with distance."""
         hits = spatial_join(self.rooms, self.buffer())
         found = [(room, room["polygon"].distance(self.point())) for room in hits]
         return sorted(found, key=lambda pair: pair[1])
 
+# ruangan yang dilewati rute user
     def visited(self):
         """Spatial Join: rooms the trail (LineString) went through."""
         if len(self.trail) < 2:

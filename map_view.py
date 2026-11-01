@@ -8,10 +8,10 @@ COLORS = {
     "Lift": "#f4a261", "Stairs": "#e76f51", "Toilet": "#8ecae6",
     "Pantry": "#b7e4c7", "Storage": "#ced4da", "Library": "#ffe8a3",
     "Lounge": "#d8c3f0", "Lab": "#a8dadc", "MeetingRoom": "#ffc8dd",
-    "Office": "#cde7b0", "Utility": "#dddddd",
+    "Office": "#cde7b0",
 }
 
-
+# untuk kasih label di lift atau tangga, nanti dipake di streamlit_app.py dan db_editor.py
 def link_label(room, links):
     """Text for a stair or lift: where it goes, e.g. "Stairs\n▲ Lt. 2A"."""
     kind = "Lift" if room["type"] == "Lift" else "Stairs"
@@ -22,13 +22,14 @@ def link_label(room, links):
         lines.append(f"▼ Lt. {links['down']}")
     return "\n".join(lines)
 
-
+# untuk 
 def add_polygon(ax, polygon, **style):
     patch = MplPolygon(list(polygon.exterior.coords), closed=True, **style)
     ax.add_patch(patch)
     return patch
 
-
+# untuk bikin denah lantai, nanti dipake di streamlit_app.py dan db_editor.py
+# kasih warna sesuai tipe ruangan, kasih label nama ruangan, dan bikin grid
 def draw_floor(ax, floor, rooms, walkable):
     """Draw the fixed part of the map. Returns {room_id: patch} so the app
     can highlight rooms later."""

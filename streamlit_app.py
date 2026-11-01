@@ -12,17 +12,21 @@ import map_view
 import movement
 import pathfinding
 
+# untuk reload kalo ada perubahan di file lain bisa langsung kebaca
 importlib.reload(map_data)
 importlib.reload(map_view)
 importlib.reload(movement)
 importlib.reload(pathfinding)
 
+# ambil function dari file lain biar bsa langsung dipake 
 from map_view import draw_floor
 from movement import Navigator
 from pathfinding import get_all_rooms, find_route, get_current_instruction
 
+# ini untuk max brp ruangan yg ditampilkan di daftar rooms dalam buffer 
 MAX_LINES = 10
 
+# js untuk gerakin titik user pake keyboard
 KEYS_JS = """
 <script>
 const doc = window.parent.document;
@@ -30,8 +34,14 @@ if (!window.parent.__ucKeys) {
   window.parent.__ucKeys = true;
   const keys = {w: "W", a: "A", s: "S", d: "D", e: "E", q: "Q",
                 ArrowUp: "W", ArrowLeft: "A", ArrowDown: "S", ArrowRight: "D"};
+                
+# untuk deteksi pas user tekan tombol keyboard 
   doc.addEventListener("keydown", (event) => {
+
+#   ini biar kalo user tekan ctrl / alt / cmd ga ke trigger 
     if (event.ctrlKey || event.metaKey || event.altKey) return;
+    
+#  ini biar kalo user lagi fokus di input / textarea / select ga ke trigger bergerak titiknya
     if (["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName)) return;
     const label = keys[event.key] || keys[event.key.toLowerCase()];
     if (!label) return;
@@ -39,6 +49,8 @@ if (!window.parent.__ucKeys) {
       const text = button.innerText.trim();
       if (text === label || (label === "E" || label === "Q") && text.startsWith(label + " ")) {
         event.preventDefault();
+
+# ini untuk trigger klik tombol yg sesuai sama tombol keyboard yg ditekan
         button.click();
         return;
       }
@@ -48,7 +60,7 @@ if (!window.parent.__ucKeys) {
 </script>
 """
 
-
+# panggil navigator dari file movement biar bsa siapin data lantai dan posisi user
 def get_nav():
     """One Navigator per browser session."""
     if "nav" not in st.session_state:
@@ -56,7 +68,7 @@ def get_nav():
         st.session_state.message = ""
     return st.session_state.nav
 
-
+# button" di kanan untuk gerakin titik user, naik turun lantai, ubah radius buffer, reset navigator
 def press(action, *args):
     nav = st.session_state.nav
     if action == "move":
@@ -73,7 +85,7 @@ def press(action, *args):
         st.session_state.selected_room_label = None
         st.session_state.search_ver = st.session_state.get("search_ver", 0) + 1
 
-
+# untuk bikin denah lantai, kasih warna sesuai tipe ruangan, kasih label nama ruangan, dan bikin grid
 def draw(nav, near, route_line=None):
     data = nav.floors[nav.floor]
     fig, ax = plt.subplots(figsize=(10, 5.2))
@@ -96,7 +108,7 @@ def draw(nav, near, route_line=None):
     plt.tight_layout()
     return fig
 
-
+# untuk bikin halaman streamlit, layout 2 kolom (denah di kiri, kontrol & info di kanan), tombol untuk gerakin titik user, naik turun lantai, ubah radius buffer, reset navigator
 st.set_page_config(page_title="UC Main Building - navigation", layout="wide")
 nav = get_nav()
 near = nav.nearby()
@@ -104,6 +116,7 @@ near = nav.nearby()
 st.title("Campus Indoor Navigation")
 # st.iframe(KEYS_JS, height=1)
 
+# untuk bikin tombol keyboard di browser biar bisa gerakin titik user pake keyboard, tapi kalo pake st.iframe ga bisa jalan, jadi diganti pake st.components.html
 components.html(KEYS_JS, height=1)
 
 # 1 Input Gabungan: Ketik langsung untuk mencari atau pilih dari daftar ruangan
@@ -111,8 +124,10 @@ all_rooms = get_all_rooms()
 room_dict = {f"{r['room_id']} - {r['name']} (Lt. {r['floor']})": r for r in all_rooms}
 room_options = ["-- Cari / Pilih Ruangan Tujuan (Semua Lantai) --"] + sorted(room_dict.keys())
 
+# buat versi search_ver biar kalo user klik tombol hapus rute, selectbox bisa reset ke default
 search_ver = st.session_state.get("search_ver", 0)
 
+# buat 2 kolom, kiri untuk input cari ruangan, kanan untuk tombol hapus rute
 col_search, col_clear = st.columns([4, 1])
 with col_search:
     curr_label = st.session_state.get("selected_room_label")
