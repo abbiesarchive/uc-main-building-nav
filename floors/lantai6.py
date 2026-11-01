@@ -24,8 +24,8 @@ PART_OF = {}
 # "up" / "down" = the floor you arrive on, "cost" = walking penalty for the route search.
 # Terhubung ke Lantai 7 (atas) dan Lantai 5 (bawah)
 LINKS = {
-    "06001": {"up": "7", "down": "5", "cost": 10},  # Lift Barat
-    "06002": {"up": "7", "down": "5", "cost": 10},  # Lift Timur
+    "06001": {},  # Lift Barat
+    "06002": {"up": "7", "down": "4", "cost": 10},  # Lift Timur
     "06003": {"up": "7", "down": "5", "cost": 8},   # Tangga Barat
     "06004": {"up": "7", "down": "5", "cost": 8},   # Tangga Utara
     "06005": {"up": "7", "down": "5", "cost": 8},   # Tangga Timur

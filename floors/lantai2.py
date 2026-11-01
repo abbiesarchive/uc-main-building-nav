@@ -23,7 +23,7 @@ LINKS = {
     "02002": {"up": "4", "down": "1", "cost": 10},   # Lift Timur: akses 1, 2, 4, 6, 7
     "02003": {"up": "2A", "cost": 8},                 # end stairs: half flight, unconfirmed
     "02005": {"up": "2A", "cost": 8},
-    "02004": {"up": "3", "cost": 20},                 # Tangga Utara skips 2A
+    "02004": {"up": "3", "down": "1", "cost": 20},                 # Tangga Utara skips 2A
     "02006": {"up": "2A", "cost": 8},                 # open stairs by the void: half flight
     "02007": {"up": "2A", "cost": 8},
     "02008": {"up": "2A", "cost": 8},
