@@ -172,22 +172,22 @@ with col_info:
     down.button("S", on_click=press, args=("move", 0, -1), use_container_width=True)
     right.button("D", on_click=press, args=("move", 1, 0), use_container_width=True)
 
+    st.write("**Stair / lift**")
+    e, q = st.columns(2)
+    e.button("E  up", on_click=press, args=("floor", True), use_container_width=True)
+    q.button("Q  down", on_click=press, args=("floor", False), use_container_width=True)
+
     st.markdown("---")
     st.markdown("**Informasi & Aturan Lift**")
     st.markdown("- **Lift Barat:** Hanya melayani lantai 1, 2, 3, 5, 7")
     st.markdown("- **Lift Timur:** Hanya melayani lantai 1, 2, 4, 6, 7")
-        
+            
     st.markdown("**Tanda pada Peta**")
     st.markdown("- **Titik Merah (di dalam):** Posisi Anda saat ini")
     st.markdown("- **Lingkaran Biru (Transparan):** Radius *buffer* / jangkauan deteksi ruangan di sekitar Anda")
     st.markdown("- **Garis Biru & Kotak Kuning:** Jalur rute navigasi menuju titik tujuan aktif")
     st.markdown("- **Ruangan Bergaris Tepi Merah:** Ruangan yang berada di dalam jangkauan radius *buffer* Anda saat ini")
     st.markdown("---")
-
-    st.write("**Stair / lift**")
-    e, q = st.columns(2)
-    e.button("E  up", on_click=press, args=("floor", True), use_container_width=True)
-    q.button("Q  down", on_click=press, args=("floor", False), use_container_width=True)
 
     st.write(f"**Buffer radius: {nav.radius} m**")
     minus, plus, reset = st.columns(3)
