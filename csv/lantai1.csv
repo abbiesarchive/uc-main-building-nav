@@ -27,6 +27,6 @@ floor,room_id,name,type,xmin,ymin,xmax,ymax
 1,109,CBz Kitchen Studio Lab (109),Lab,88.5,40.0,99.5,50.0
 1,110,CBz Beverages Lab (110),Lab,88.5,50.0,96.5,60.0
 1,01005,Tangga Timur Lt 1,Stairs,96.5,50.0,99.5,60.0
-1,10,UC Main Building Lobby,Outdoor,45.5,60.0,57.5,64.0
-1,11,UC Plaza,Outdoor,38.0,0.0,62.0,40.0
+1,10,UC Main Building Lobby,Lounge,45.5,60.0,57.5,64.0
+1,11,UC Plaza,Lounge,38.0,0.0,62.0,40.0
 1,01006,Tangga Selatan Lt 1,Stairs,62.0,0.0,71.0,3.0
