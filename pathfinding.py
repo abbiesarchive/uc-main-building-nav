@@ -45,8 +45,6 @@ def going_up(current_floor, target_floor):
     return get_floor(target_floor).LEVEL > get_floor(current_floor).LEVEL
 
 
-# ---------------------------------------------------------------- the grid
-
 def _cells_in(geometry):
     """Whole-meter cells (x, y) covered by a shapely geometry."""
     xmin, ymin, xmax, ymax = geometry.bounds
@@ -95,9 +93,6 @@ def floor_cost(start_floor, target_floor):
                     best[nxt] = new_cost
                     heapq.heappush(queue, (new_cost, nxt))
     return None
-
-
-# ---------------------------------------------------------------- A*
 
 def astar(start_floor, start, target_room):
     """Cheapest list of nodes [(floor, x, y), ...] from start to the target room, or None."""
@@ -178,9 +173,6 @@ def _search(current_floor, start_pos, target_room):
         _last["key"] = key
         _last["path"] = astar(current_floor, start_pos, target_room)
     return _last["path"]
-
-
-# ---------------------------------------------------------------- results for the app
 
 def plan(current_floor, start_pos, target_room):
     """The part of the route on the current floor.

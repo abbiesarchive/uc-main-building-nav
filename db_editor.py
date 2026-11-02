@@ -49,7 +49,7 @@ try:
     rooms = data["rooms"]
     walkable = data["walkable"]
 
-    # Gambar denah menggunakan fungsi yang sama
+    # Besar denahnya seberapa 
     fig, ax = plt.subplots(figsize=(14, 4.6))
 
     draw_floor(ax, floor_key, rooms, walkable)
@@ -69,7 +69,9 @@ except Exception as e:
 edited_df = st.data_editor(
     df,
     use_container_width=True,
-    num_rows="dynamic",  # Mengizinkan tambah / hapus baris langsung
+    # biar bsa tambah baris di bawah 
+    num_rows="dynamic",  
+    # isi kolom sesuai tipe data
     column_config={
         "floor": st.column_config.TextColumn("Lantai"),
         "room_id": st.column_config.TextColumn("ID Ruangan (Unik)"),
@@ -90,11 +92,11 @@ col1, col2 = st.columns([1, 4])
 with col1:
     # 5. Tombol Simpan
     if st.button("Save", type="secondary", use_container_width=True):
-        # Validasi sederhana: pastikan tidak ada room_id kosong
+        # pastikan tidak ada room_id kosong
         if edited_df["room_id"].isna().any() or (edited_df["room_id"] == "").any():
             st.error("Gagal simpan: Ada baris dengan ID Ruangan yang kosong!")
         else:
-            # Simpan kembali ke file CSV
+            # Save file csv yang sudah diedit
             edited_df.to_csv(selected_path, index=False)
             st.success(f"Berhasil disimpan ke `{selected_filename}`!")
 
