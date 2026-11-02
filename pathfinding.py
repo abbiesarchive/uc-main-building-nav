@@ -28,20 +28,25 @@ GOAL_REACH = 1.0            # a closed room is reached when you stand within 1 m
 
 def get_all_rooms():
     """Every room of every mapped floor, each with its floor."""
+    # buat list kosong buat nampung all ruangan
     all_rooms = []
+    # looping semua lantai yang ada di load_all() (lantai yang ada di folder floors) untuk ambil semua ruangan di tiap lantai dan simpan di all_rooms
     for f in load_all():
         for r in load_rooms(f):
             all_rooms.append({**r, "floor": f})
+            # jadi bisa dikembalikan dalam bentuk list yg isinya all ruangan 
     return all_rooms
 
 
+# cari titik tengah dari sebuah ruangan biar bsa set goal di rute navigasi
 def get_room_center(room):
     c = room["polygon"].centroid
     return (round(c.x, 1), round(c.y, 1))
 
-
+# ini untuk cek lantai tujuan itu ada di atas atau bawah biar tau arahan naik turun 
 def going_up(current_floor, target_floor):
     """True if the target floor is above the current floor (uses LEVEL, so 2A is between 2 and 3)."""
+    # ini nentuin naik turunnya itu berdasarkan urutan lv dari lantai 
     return get_floor(target_floor).LEVEL > get_floor(current_floor).LEVEL
 
 
@@ -231,7 +236,7 @@ def get_current_instruction(current_floor, pos, target_room):
 
     if link is None:
         if line.length < 1.5:
-            return f"🎉 Anda telah sampai di ruangan {target_room['name']}!"
+            return f"Anda telah sampai di ruangan {target_room['name']}!"
         goal_name = f"ruangan {target_room['name']}"
         arah_text = ""
     else:

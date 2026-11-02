@@ -29,9 +29,14 @@ MAX_LINES = 10
 # js untuk gerakin titik user pake keyboard
 KEYS_JS = """
 <script>
+# biar js bisa akses html di streamlit 
 const doc = window.parent.document;
+
+# periksa keyboard listenernya udh kepasang apa blm 
 if (!window.parent.__ucKeys) {
   window.parent.__ucKeys = true;
+  
+# dictionary untuk mapping tombol keyboard ke tombol di streamlit
   const keys = {w: "W", a: "A", s: "S", d: "D", e: "E", q: "Q",
                 ArrowUp: "W", ArrowLeft: "A", ArrowDown: "S", ArrowRight: "D"};
                 
@@ -63,7 +68,9 @@ if (!window.parent.__ucKeys) {
 # panggil navigator dari file movement biar bsa siapin data lantai dan posisi user
 def get_nav():
     """One Navigator per browser session."""
+    # cek nav sudah pernah dijalankan dan pernah tersimpan atau tidak 
     if "nav" not in st.session_state:
+        # kalo belum dia panggik dan simpan di session state 
         st.session_state.nav = Navigator()
         st.session_state.message = ""
     return st.session_state.nav
@@ -119,39 +126,59 @@ st.title("Campus Indoor Navigation")
 # untuk bikin tombol keyboard di browser biar bisa gerakin titik user pake keyboard, tapi kalo pake st.iframe ga bisa jalan, jadi diganti pake st.components.html
 components.html(KEYS_JS, height=1)
 
+# ambil semua data lalu tampilkan di box select 
 # 1 Input Gabungan: Ketik langsung untuk mencari atau pilih dari daftar ruangan
 all_rooms = get_all_rooms()
 room_dict = {f"{r['room_id']} - {r['name']} (Lt. {r['floor']})": r for r in all_rooms}
 room_options = ["-- Cari / Pilih Ruangan Tujuan (Semua Lantai) --"] + sorted(room_dict.keys())
 
 # buat versi search_ver biar kalo user klik tombol hapus rute, selectbox bisa reset ke default
+# st session search state untuk simpan data sementara dari search user 
+# .get untuk ambil data searchnya, kalo misal blm ada brrti set 0 
 search_ver = st.session_state.get("search_ver", 0)
 
 # buat 2 kolom, kiri untuk input cari ruangan, kanan untuk tombol hapus rute
+# kolom untuk search dan kolom untuk hapus 
 col_search, col_clear = st.columns([4, 1])
+# data di bawah itu jalan untuk kolom searchnya 
 with col_search:
+    # ambil label ruangan yagn dipiliih user 
     curr_label = st.session_state.get("selected_room_label")
+    # kalo misal label ruangan yg dipilih ada di daftar dia langsung ambil indexnya 
     selected_idx = room_options.index(curr_label) if curr_label in room_options else 0
+    # yang ditampilkan di selectboxnya 
     selected_label = st.selectbox(
         "Cari Ruangan Tujuan (Semua Lantai):",
         options=room_options,
         index=selected_idx,
+        # dia buat key sesuai dengan nilai search ver yang dimasukan user 
         key=f"search_room_select_{search_ver}"
     )
+    # untuk periksa label yang dipilih user ini valid ada atau tidak, kalo ada dia simpan data di session state, kalo ga ada dia set ke None
     if selected_label in room_dict:
+        # kalo valid dia ambil data dari room_dictnya dan simpan di target room
         st.session_state.target_room = room_dict[selected_label]
+        # simpan label yang dipilih biar bs ditampilin di search pas 
         st.session_state.selected_room_label = selected_label
+    # kalo misal ga valid dia set kosong
     else:
         st.session_state.target_room = None
         st.session_state.selected_room_label = None
 
+# ini kode di bawah untuk button hapus 
 with col_clear:
+    # hanya untuk tambah ruang kosong bair sejajar kolomnya 
     st.write("")
     st.write("")
+    # width untuk ukuran button, lalu jika ditekan maka dia lanjut
     if st.button("Hapus Rute", use_container_width=True):
+        # hapus tujuan ruangan yang sblmnya tersimpan di st session state 
         st.session_state.target_room = None
+        # hapus label ruangannya jg 
         st.session_state.selected_room_label = None
+        # buat search ver baru biar program tau kalo user udh klik hapus rute dan reset selectbox ke default
         st.session_state.search_ver = search_ver + 1
+        # jalan ulang aplikasi 
         st.rerun()
 
 # Hitung rute navigasi dan 1 arahan langkah aktif saat ini
@@ -182,6 +209,7 @@ with col_info:
     st.write("**Walk (1 m per click)**")
     _, up, _ = st.columns(3)
     left, down, right = st.columns(3)
+    # args ini untuk kirim 
     up.button("W", on_click=press, args=("move", 0, 1), use_container_width=True)
     left.button("A", on_click=press, args=("move", -1, 0), use_container_width=True)
     down.button("S", on_click=press, args=("move", 0, -1), use_container_width=True)
