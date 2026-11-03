@@ -89,9 +89,12 @@ def draw(nav, near, route_line=None):
         gx, gy = route_line.coords[-1]
         ax.plot([gx], [gy], "s", color="#ffb703", markersize=10, markeredgecolor="#000", zorder=7)
 
+# gambar buffer radiusnya 
     ax.add_patch(MplPolygon(list(nav.buffer().exterior.coords), closed=True, facecolor="#1565c0",
                             alpha=0.15, edgecolor="#1565c0", linewidth=1.5, zorder=3))
+# gambar titik usernya 
     ax.plot([nav.x], [nav.y], "o", color="#d00000", markersize=11, markeredgecolor="white", zorder=8)
+# tampilin judul lantai dan posisi usernya 
     ax.set_title(f"Lt. {nav.floor}   posisi: ({nav.x:g}, {nav.y:g}) m", fontsize=10)
     plt.tight_layout()
     return fig
@@ -102,11 +105,13 @@ nav = get_nav()
 near = nav.nearby()
 
 st.title("Campus Indoor Navigation")
-# st.iframe(KEYS_JS, height=1)
 
+# ini buat aktifin listener keyboard js yang di atas tadi
+# st.iframe(KEYS_JS, height=1)
 components.html(KEYS_JS, height=1)
 
-# 1 Input Gabungan: Ketik langsung untuk mencari atau pilih dari daftar ruangan
+# SEARCHHHH
+# 1 Input Gabungan Ketik langsung untuk mencari atau pilih dari daftar ruangan
 all_rooms = get_all_rooms()
 room_dict = {f"{r['room_id']} - {r['name']} (Lt. {r['floor']})": r for r in all_rooms}
 room_options = ["-- Cari / Pilih Ruangan Tujuan (Semua Lantai) --"] + sorted(room_dict.keys())
