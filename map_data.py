@@ -1,4 +1,4 @@
-"""Map layers for one floor, built from the room CSV and floors/<floor>.py.
+"""Map layers for one floor, built from the SQLite room table and floors/<floor>.py.
 Units are meters.
 
 Layers:
@@ -8,11 +8,11 @@ Layers:
 """
 from functools import lru_cache
 
-import pandas as pd
 from shapely.geometry import Point, box
 from shapely.ops import unary_union
 
-from floors import ROOT, get_floor
+from database import fetch_rooms, revision
+from floors import get_floor
 
 # stairs and lifts: the dot can stand here and press E / Q to change floor
 LINK_TYPES = ("Stairs", "Lift")
@@ -30,25 +30,14 @@ def voids(floor):
     return [box(*rect) for rect in get_floor(floor).VOIDS]
 
 
-def read_csv(path):
-    df = pd.read_csv(path, dtype={"floor": str, "room_id": str})
-    df.columns = df.columns.str.strip()
-    return df
-
-
-def load_rooms(floor, csv_path=None):
+def load_rooms(floor):
     """Return a list of dicts: room_id, name, type, polygon."""
     settings = get_floor(floor)
-    df = read_csv(csv_path or ROOT / settings.ROOMS_CSV)
-    parts = [df[df["floor"] == floor]]
-    # rooms shared with another floor (the Lt. 2 / 2A core) are stored once, there
-    for other, ids in settings.SHARED.items():
-        other_df = read_csv(ROOT / get_floor(other).ROOMS_CSV)
-        parts.append(other_df[other_df["room_id"].isin(ids)])
-    rows = pd.concat(parts)
-    return [{"room_id": r.room_id, "name": r.name, "type": r.type,
-             "polygon": box(r.xmin, r.ymin, r.xmax, r.ymax)}
-            for r in rows.itertuples()]
+    return [
+        {"room_id": row["room_id"], "name": row["name"], "type": row["type"],
+         "polygon": box(row["xmin"], row["ymin"], row["xmax"], row["ymax"])}
+        for row in fetch_rooms(floor, settings.SHARED)
+    ]
 
 
 def free_rectangles(rooms, floor):
@@ -105,8 +94,12 @@ def build_walkable(floor, rooms):
     return areas
 
 
-@lru_cache
 def walkable_area(floor):
+    return _walkable_area(floor, revision())
+
+
+@lru_cache
+def _walkable_area(floor, db_revision):
     """Where the dot can stand: the outline minus the voids. Unless a floor sets
     ROOMS_WALKABLE = True, also minus every room except stairs, lifts, Lounges and
     the rooms listed in OPEN_ROOMS. Each blocked room is grown by 1 cm so its wall

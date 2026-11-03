@@ -12,10 +12,10 @@ Run this before every commit. Units are meters.
 import sys
 from collections import Counter
 
-import pandas as pd
 from shapely.geometry import Point, box
 
-from floors import ROOT, get_floor, load_all
+from database import fetch_rooms
+from floors import get_floor, load_all
 from map_data import LINK_TYPES, building, is_walkable, load_rooms, voids
 
 OPPOSITE = {"up": "down", "down": "up"}
@@ -23,19 +23,17 @@ STEP = 1
 
 
 def check_rows(floor):
-    """Problems you can see in the csv itself."""
+    """Validate the room records for this floor in SQLite."""
     errors = []
-    df = pd.read_csv(ROOT / get_floor(floor).ROOMS_CSV, dtype={"floor": str, "room_id": str})
-    df.columns = df.columns.str.strip()
-    df = df[df["floor"] == floor]
-    if df.empty:
-        return [f"no rows for floor {floor!r} in {get_floor(floor).ROOMS_CSV}"]
-    for room_id, n in Counter(df["room_id"]).items():
+    rows = fetch_rooms(floor)
+    if not rows:
+        return [f"no rows for floor {floor!r} in campus.db"]
+    for room_id, n in Counter(row["room_id"] for row in rows).items():
         if n > 1:
             errors.append(f"duplicate room_id {room_id} ({n} rows)")
-    for r in df.itertuples():
-        if r.xmin >= r.xmax or r.ymin >= r.ymax:
-            errors.append(f"{r.room_id} {r.name}: min is not smaller than max")
+    for row in rows:
+        if row["xmin"] >= row["xmax"] or row["ymin"] >= row["ymax"]:
+            errors.append(f"{row['room_id']} {row['name']}: min is not smaller than max")
     return errors
 
 
@@ -130,7 +128,7 @@ def check_link_back(floor, room_id, room, direction, target):
 def main(wanted):
     floors = wanted or list(load_all())
     if not floors:
-        print("ERROR: no floor files found in floors/ (add floors/lantai2.py and its csv)")
+        print("ERROR: no floor files found in floors/ (add a floor settings file)")
         return 1
     failed = False
     for floor in floors:
