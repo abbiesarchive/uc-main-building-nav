@@ -9,25 +9,26 @@ The user is (floor, x, y). Each step the app asks this file:
 Floors come from the files in floors/, so nothing here is specific to one floor.
 """
 from shapely.geometry import LineString, Point
-
 from floors import load_all
 from gis_ops import buffer_around, rooms_along_route, spatial_join
 from map_data import LINK_TYPES, build_walkable, is_walkable, load_rooms, room_at
+from pathfinding import walkable_cells
 
-STEP = 1                 # one key press = 1 m
+STEP = 1
 MIN_RADIUS, MAX_RADIUS = 1, 15
 
 
 class Navigator:
-    def __init__(self, floor=None, radius=5):
+    def __init__(self, floor=None, radius=5, step=STEP):
         self.settings = load_all()
         self.floors = {}
         for name in self.settings:
             rooms = load_rooms(name)
             self.floors[name] = {"rooms": rooms, "walkable": build_walkable(name, rooms)}
-        floor = floor or next(iter(self.settings))      # lowest floor by default
+        floor = floor or next(iter(self.settings))  # lowest floor by default
         self.start = (floor, *self.settings[floor].START)
         self.radius = radius
+        self.step = step
         self.reset()
 
     def reset(self):
@@ -38,15 +39,49 @@ class Navigator:
     def rooms(self):
         return self.floors[self.floor]["rooms"]
 
-    # ---- moving -----------------------------------------------------------
+    # ---- moving
+    def set_step(self, step):
+        """Atur jarak langkah jalan dalam meter."""
+        self.step = max(1, int(step))
+
     def move(self, dx, dy):
-        """Step one meter. Returns a message, or "" when the step worked."""
-        nx, ny = self.x + dx * STEP, self.y + dy * STEP
-        if not is_walkable(self.floor, nx, ny):
-            return "Blocked: that is a closed room, the void or outside the building."
-        self.x, self.y = nx, ny
-        self.trail.append((nx, ny))
+        """Step self.step meter. Mengecek tiap 1m agar tidak menembus tembok."""
+        moved = 0
+        for _ in range(self.step):
+            nx, ny = self.x + dx, self.y + dy
+            if not is_walkable(self.floor, nx, ny):
+                if moved == 0:
+                    return "Blocked: that is a closed room, the void or outside the building."
+                return f"Blocked after {moved} m (stopped before obstacle)."
+            self.x, self.y = nx, ny
+            self.trail.append((nx, ny))
+            moved += 1
         return ""
+
+    def teleport_to_room(self, room):
+        """Teleport ke titik walkable terdekat dari ruangan yang dipilih."""
+        target_floor = str(room["floor"])
+        if target_floor not in self.floors:
+            return f"Lt. {target_floor} belum tersedia."
+
+        poly = room["polygon"]
+        c = poly.centroid
+        cx, cy = round(c.x), round(c.y)
+
+        # Jika titik tengah ruangan bisa diinjak (misal Lounge, Lift, Tangga, Open Room)
+        if is_walkable(target_floor, cx, cy):
+            tx, ty = cx, cy
+        else:
+            # Jika ruangan tertutup, cari titik walkable terdekat di luar/sekitar ruangan
+            cells = walkable_cells(target_floor)
+            if not cells:
+                return f"Tidak ada area jalan di Lt. {target_floor}."
+            tx, ty = min(cells, key=lambda pt: ( poly.distance(Point(pt)), (pt[0] - cx)**2 + (pt[1] - cy)**2 ))
+
+        self.floor = target_floor
+        self.x, self.y = tx, ty
+        self.trail = [(self.x, self.y)]
+        return f"Teleported ke dekat {room['name']} (Lt. {target_floor}) di ({tx:g}, {ty:g}) m."
 
     def link(self):
         """The stair or lift the user stands in: (room, links dict), or (None, None)."""
@@ -88,6 +123,7 @@ class Navigator:
 
         if target not in self.floors:
             return f"Lt. {target} is not mapped yet (no file for it in floors/)."
+
         self.floor = target
         self.trail = [(self.x, self.y)]
         return f"You took {room['name']} to Lt. {target}."
@@ -116,12 +152,12 @@ class Navigator:
     def set_radius(self, delta):
         self.radius = max(MIN_RADIUS, min(MAX_RADIUS, self.radius + delta))
 
-    # ---- the layers and the two GIS operations -----------------------------
+    # ---- the layers and the two GIS operations
     def point(self):
-        return Point(self.x, self.y)                      # Point layer
+        return Point(self.x, self.y)
 
     def buffer(self):
-        return buffer_around(self.x, self.y, self.radius)  # Buffer
+        return buffer_around(self.x, self.y, self.radius)
 
     def here(self):
         return room_at(self.rooms, self.x, self.y)

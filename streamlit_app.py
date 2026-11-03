@@ -1,5 +1,5 @@
 """Walk through the building in the browser.
-Run:  streamlit run streamlit_app.py
+Run: streamlit run streamlit_app.py
 """
 import importlib
 import matplotlib.pyplot as plt
@@ -26,24 +26,24 @@ MAX_LINES = 10
 KEYS_JS = """
 <script>
 const doc = window.parent.document;
-if (!window.parent.__ucKeys) {
-  window.parent.__ucKeys = true;
-  const keys = {w: "W", a: "A", s: "S", d: "D", e: "E", q: "Q",
-                ArrowUp: "W", ArrowLeft: "A", ArrowDown: "S", ArrowRight: "D"};
-  doc.addEventListener("keydown", (event) => {
-    if (event.ctrlKey || event.metaKey || event.altKey) return;
-    if (["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName)) return;
-    const label = keys[event.key] || keys[event.key.toLowerCase()];
-    if (!label) return;
-    for (const button of doc.querySelectorAll("button")) {
-      const text = button.innerText.trim();
-      if (text === label || (label === "E" || label === "Q") && text.startsWith(label + " ")) {
-        event.preventDefault();
-        button.click();
-        return;
-      }
-    }
-  });
+if (!window.parent._ucKeys) {
+    window.parent._ucKeys = true;
+    const keys = {w: "W", a: "A", s: "S", d: "D", e: "E", q: "Q",
+                  ArrowUp: "W", ArrowLeft: "A", ArrowDown: "S", ArrowRight: "D"};
+    doc.addEventListener("keydown", (event) => {
+        if (event.ctrlKey || event.metaKey || event.altKey) return;
+        if (["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName)) return;
+        const label = keys[event.key] || keys[event.key.toLowerCase()];
+        if (!label) return;
+        for (const button of doc.querySelectorAll("button")) {
+            const text = button.innerText.trim();
+            if (text === label || (label === "E" || label === "Q") && text.startsWith(label + " ")) {
+                event.preventDefault();
+                button.click();
+                return;
+            }
+        }
+    });
 }
 </script>
 """
@@ -66,6 +66,12 @@ def press(action, *args):
     elif action == "radius":
         nav.set_radius(args[0])
         st.session_state.message = ""
+    elif action == "teleport":
+        room = args[0]
+        if room:
+            st.session_state.message = nav.teleport_to_room(room)
+        else:
+            st.session_state.message = "Pilih lokasi ruangan terlebih dahulu untuk teleport."
     elif action == "reset":
         st.session_state.nav = Navigator()
         st.session_state.message = ""
@@ -78,42 +84,66 @@ def draw(nav, near, route_line=None):
     data = nav.floors[nav.floor]
     fig, ax = plt.subplots(figsize=(10, 5.2))
     patches = draw_floor(ax, nav.floor, data["rooms"], data["walkable"])
+
     for room, _ in near:
-        patches[room["room_id"]].set_edgecolor("#d00000")
+        patches[room["room_id"]].set_edgecolor("#000000")
         patches[room["room_id"]].set_linewidth(2.2)
 
-    # Gambar rute AI LineString jika ada tujuan aktif
+    # Gambar rute A* LineString jika ada tujuan aktif
     if route_line and len(route_line.coords) > 1:
         rx, ry = route_line.xy
         ax.plot(rx, ry, color="#0077b6", linewidth=4.0, zorder=6, linestyle="-", label="Rute")
         gx, gy = route_line.coords[-1]
         ax.plot([gx], [gy], "s", color="#ffb703", markersize=10, markeredgecolor="#000", zorder=7)
 
-    ax.add_patch(MplPolygon(list(nav.buffer().exterior.coords), closed=True, facecolor="#1565c0",
-                            alpha=0.15, edgecolor="#1565c0", linewidth=1.5, zorder=3))
+    ax.add_patch(MplPolygon(list(nav.buffer().exterior.coords), closed=True,
+                            facecolor="#1565c0", alpha=0.15, edgecolor="#1565c0", linewidth=1.5, zorder=3))
     ax.plot([nav.x], [nav.y], "o", color="#d00000", markersize=11, markeredgecolor="white", zorder=8)
-    ax.set_title(f"Lt. {nav.floor}   posisi: ({nav.x:g}, {nav.y:g}) m", fontsize=10)
+
+    ax.set_title(f"Lt. {nav.floor} posisi: ({nav.x:g}, {nav.y:g}) m", fontsize=10)
     plt.tight_layout()
     return fig
 
 
 st.set_page_config(page_title="UC Main Building - navigation", layout="wide")
 nav = get_nav()
-near = nav.nearby()
 
 st.title("Campus Indoor Navigation")
-# st.iframe(KEYS_JS, height=1)
-
 components.html(KEYS_JS, height=1)
 
-# 1 Input Gabungan: Ketik langsung untuk mencari atau pilih dari daftar ruangan
+# Daftar seluruh ruangan untuk dropdown
 all_rooms = get_all_rooms()
 room_dict = {f"{r['room_id']} - {r['name']} (Lt. {r['floor']})": r for r in all_rooms}
-room_options = ["-- Cari / Pilih Ruangan Tujuan (Semua Lantai) --"] + sorted(room_dict.keys())
 
+# buat telepoert
+tp_options = ["-- Pilih Lokasi Saat Ini untuk Teleport (Semua Lantai) --"] + sorted(room_dict.keys())
+col_tp_select, col_tp_btn = st.columns([4, 1])
+
+with col_tp_select:
+    tp_label = st.selectbox(
+        "Lokasi Saat Ini (Teleport):",
+        options=tp_options,
+        index=0,
+        key="teleport_room_select"
+    )
+    tp_room = room_dict.get(tp_label)
+
+with col_tp_btn:
+    st.write("")
+    st.write("")
+    st.button(
+        "Teleport",
+        on_click=press,
+        args=("teleport", tp_room),
+        use_container_width=True
+    )
+
+#inputan buat ketik or dropdown
+room_options = ["-- Cari / Pilih Ruangan Tujuan (Semua Lantai) --"] + sorted(room_dict.keys())
 search_ver = st.session_state.get("search_ver", 0)
 
 col_search, col_clear = st.columns([4, 1])
+
 with col_search:
     curr_label = st.session_state.get("selected_room_label")
     selected_idx = room_options.index(curr_label) if curr_label in room_options else 0
@@ -123,6 +153,7 @@ with col_search:
         index=selected_idx,
         key=f"search_room_select_{search_ver}"
     )
+
     if selected_label in room_dict:
         st.session_state.target_room = room_dict[selected_label]
         st.session_state.selected_room_label = selected_label
@@ -139,9 +170,12 @@ with col_clear:
         st.session_state.search_ver = search_ver + 1
         st.rerun()
 
+# Hitung ulang nearby setelah potensi perubahan posisi
+near = nav.nearby()
+
 # Hitung rute navigasi dan 1 arahan langkah aktif saat ini
 route_line, current_instruction = None, ""
-if st.session_state.target_room:
+if st.session_state.get("target_room"):
     route_line, _, _ = find_route(nav.floor, (nav.x, nav.y), st.session_state.target_room)
     current_instruction = get_current_instruction(nav.floor, (nav.x, nav.y), st.session_state.target_room)
 
@@ -164,7 +198,17 @@ with col_info:
     if st.session_state.message:
         st.warning(st.session_state.message)
 
-    st.write("**Walk (1 m per click)**")
+    # Pengaturan range jalan dalam meter
+    step_val = st.number_input(
+        "Jarak jalan per klik (meter):",
+        min_value=1,
+        max_value=20,
+        value=nav.step,
+        step=1
+    )
+    nav.set_step(step_val)
+
+    st.write(f"**Walk ({nav.step} m per click)**")
     _, up, _ = st.columns(3)
     left, down, right = st.columns(3)
     up.button("W", on_click=press, args=("move", 0, 1), use_container_width=True)
@@ -174,14 +218,13 @@ with col_info:
 
     st.write("**Stair / lift**")
     e, q = st.columns(2)
-    e.button("E  up", on_click=press, args=("floor", True), use_container_width=True)
-    q.button("Q  down", on_click=press, args=("floor", False), use_container_width=True)
+    e.button("E up", on_click=press, args=("floor", True), use_container_width=True)
+    q.button("Q down", on_click=press, args=("floor", False), use_container_width=True)
 
     st.markdown("---")
     st.markdown("**Informasi & Aturan Lift**")
     st.markdown("- **Lift Barat:** Hanya melayani lantai 1, 2, 3, 5, 7")
     st.markdown("- **Lift Timur:** Hanya melayani lantai 1, 2, 4, 6, 7")
-            
     st.markdown("**Tanda pada Peta**")
     st.markdown("- **Titik Merah (di dalam):** Posisi Anda saat ini")
     st.markdown("- **Lingkaran Biru (Transparan):** Radius *buffer* / jangkauan deteksi ruangan di sekitar Anda")
@@ -197,7 +240,7 @@ with col_info:
 
     st.write(f"**Rooms in buffer ({len(near)}):**")
     st.text("\n".join(
-        f"{'inside' if dist == 0 else f'{dist:.1f} m':>7}  {room['room_id']}  {room['name']}"
+        f"{'inside' if dist == 0 else f'{dist:.1f} m':>7} {room['room_id']} {room['name']}"
         for room, dist in near[:MAX_LINES]) + (f"\n... and {len(near) - MAX_LINES} more" if len(near) > MAX_LINES else ""))
 
     passed = [room["room_id"] for room in nav.visited()]
