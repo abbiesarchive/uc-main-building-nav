@@ -1,14 +1,3 @@
-"""Check every floor in floors/ and stop with an error if something is wrong.
-
-Run:  python check_floors.py          (all floors)
-      python check_floors.py 3        (one floor)
-
-Errors (exit code 1): duplicate IDs, min bigger than max, rooms outside the outline
-or inside a void, overlapping rooms, a start point that is missing or blocked,
-rooms nobody can walk to, stair / lift links that do not match on both floors.
-Warnings: a link to a floor that has no file yet, thin gaps between rooms.
-Run this before every commit. Units are meters.
-"""
 import sys
 from collections import Counter
 

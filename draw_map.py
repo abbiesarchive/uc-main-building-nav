@@ -14,11 +14,9 @@ from map_view import add_polygon, draw_floor
 
 FLOOR = sys.argv[1] if len(sys.argv) > 1 else "2"
 
-# ---- Try this ------------------------------------------------------------
 USER = get_floor(FLOOR).START                 # x, y of the user (m)
 RADIUS = 5                                    # buffer radius (m)
 ROUTE = [USER, (USER[0] + 12, USER[1]), (USER[0] + 20, USER[1] - 3)]   # points (m)
-# --------------------------------------------------------------------------
 
 rooms = load_rooms(FLOOR)
 fig, ax = plt.subplots(figsize=(18, 8))
