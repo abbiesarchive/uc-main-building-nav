@@ -18,6 +18,7 @@ import shapely
 from functools import lru_cache
 from shapely.geometry import LineString, Point
 
+from database import revision
 from floors import get_floor, load_all
 from map_data import LINK_TYPES, load_rooms, walkable_area
 
@@ -55,14 +56,22 @@ def _cells_in(geometry):
     return {(int(x), int(y)) for x, y in zip(xs[inside], ys[inside])}
 
 
-@lru_cache
 def walkable_cells(floor):
+    return _walkable_cells(floor, revision())
+
+
+@lru_cache
+def _walkable_cells(floor, db_revision):
     """Cells where the dot can stand (the same rule as map_data.walkable_area)."""
     return frozenset(_cells_in(walkable_area(floor)))
 
 
-@lru_cache
 def link_cells(floor):
+    return _link_cells(floor, revision())
+
+
+@lru_cache
+def _link_cells(floor, db_revision):
     """{cell: [stair/lift room, ...]} for every stair and lift on the floor."""
     cells = {}
     for room in load_rooms(floor):
@@ -168,7 +177,8 @@ _last = {"key": None, "path": None}
 
 def _search(current_floor, start_pos, target_room):
     """astar() with a one-entry cache (the app asks twice per redraw)."""
-    key = (current_floor, round(start_pos[0]), round(start_pos[1]), target_room["floor"], target_room["room_id"])
+    key = (revision(), current_floor, round(start_pos[0]), round(start_pos[1]),
+           target_room["floor"], target_room["room_id"])
     if _last["key"] != key:
         _last["key"] = key
         _last["path"] = astar(current_floor, start_pos, target_room)

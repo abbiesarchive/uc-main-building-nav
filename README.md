@@ -28,9 +28,21 @@ pip install -r requirements.txt
 
 ## Run
 
+Import the room data into SQLite once before starting the apps (or after changing
+the source CSV files):
+
+```
+python load_db.py
+```
+
+The navigation app and room editor then read and write `campus.db`. CSV files are
+used only as the import source; `python load_db.py` rebuilds the database from them,
+while `python load_db.py --keep` preserves an existing `rooms` table.
+
 ```
 python app.py              walk around (opens a window)
 streamlit run streamlit_app.py   walk around in the browser (buttons)
+streamlit run db_editor.py --server.port 8502   edit SQLite room data
 python app.py 3            start on Lt. 3
 python check_floors.py     check all floors  (run this before every commit)
 python plot_floor.py 2     draw floor 2 and check it (add "overlay" to lay it on the plan image)
@@ -54,28 +66,40 @@ Say you do Lt. 3:
 3. `LINKS` says where each stair and lift on your floor leads, for example
    `"03003": {"up": "4", "down": "2A", "cost": 8}`. The other floor's file must have the
    stair going back. `check_floors.py` tests that.
-4. Run `python check_floors.py` and fix every error, then `python plot_floor.py 3 overlay`
+4. Run `python load_db.py` to import the new floor's CSV, then run
+   `python check_floors.py` and fix every error. Next run `python plot_floor.py 3 overlay`
    and look at the picture, then `python app.py 3` and walk your floor.
 5. Commit **only** your own files: `csv/lantai3.csv` and `floors/lantai3.py`. The app
    loads every file in `floors/` by itself, so nobody edits a shared list.
 
+## Data storage
+
+- `campus.db` is the runtime source of room data. It contains `rooms` and generated
+  `walkable` tables; the application computes walkable geometry from room records and
+  floor settings when needed.
+- `load_db.py` imports `csv/lantai*.csv` into SQLite. CSVs are retained as source data
+  and for rebuilding the database; edits made in `db_editor.py` are saved to SQLite.
+- `campus.db` is excluded from git, so initialize it with `python load_db.py` after
+  cloning or whenever you want to rebuild from the CSV source.
+- Floor shape, voids, start positions and stair/lift connections remain in
+  `floors/*.py`.
+
 ## What goes in git
 
 - Committed: the code, `csv/lantai*.csv`, `floors/*.py`, `CLAUDE.md`, this README.
-- Not committed (see `.gitignore`): `.venv`, pictures like `floor_2_overlay.png`, and
-  `csv/walkable_*.csv`. The corridors are rebuilt from the room CSV every time the app
-  starts, so there is no generated file to conflict on.
-- **The CSV files are the database.** `load_db.py` (not written yet) will build
-  `campus.db` from them for the AI course. The `.db` file is a generated copy and is not
-  committed, because git cannot merge it. The edit view will save back to the CSV.
+- Not committed (see `.gitignore`): `.venv`, `campus.db`, pictures like
+  `floor_2_overlay.png`, and `csv/walkable_*.csv`.
 
 ## Files
 
 | File | Job |
 |---|---|
 | `floors/` | one settings file per floor (outline, voids, start, stair links) |
-| `csv/` | one room table per floor |
-| `map_data.py` | CSV to polygons, corridors, "can I stand here?" |
+| `csv/` | room data source for SQLite import |
+| `campus.db` | runtime SQLite database for room records |
+| `database.py` | SQLite reads, writes, and validation |
+| `load_db.py` | imports CSV room data into SQLite |
+| `map_data.py` | database records to polygons, corridors, "can I stand here?" |
 | `gis_ops.py` | Buffer and Spatial Join |
 | `movement.py` | walking rules, changing floors, what is near you |
 | `map_view.py` | draws a floor |
