@@ -9,10 +9,10 @@ The user is (floor, x, y). Each step the app asks this file:
 Floors come from the files in floors/, so nothing here is specific to one floor.
 """
 from shapely.geometry import LineString, Point
-
 from floors import load_all
 from gis_ops import buffer_around, rooms_along_route, spatial_join
 from map_data import LINK_TYPES, build_walkable, is_walkable, load_rooms, room_at
+from pathfinding import walkable_cells
 
 STEP = 1
 MIN_RADIUS, MAX_RADIUS = 1, 15
