@@ -19,14 +19,14 @@ PART_OF = {"203": (86, 59), "226": (32, 48.7), "225": (24, 42)}
 #   "up" / "down" = the floor you arrive on, "cost" = walking penalty for the route search.
 # The other floor's file must have the matching stair going back (check_floors.py tests this).
 LINKS = {
-    "02001": {"up": "3", "down": "1", "cost": 10},   # Lift Barat: akses 1, 2, 3, 5, 7
-    "02002": {"up": "4", "down": "1", "cost": 10},   # Lift Timur: akses 1, 2, 4, 6, 7
-    "02003": {"up": "2A", "down": "1", "cost": 8},    # Tangga Barat: 1 <-> 2 <-> 2A <-> 3 (2A half flight unconfirmed)
-    "02005": {"up": "2A", "down": "1", "cost": 8},    # Tangga Timur, same as Barat
-    "02004": {"up": "3", "down": "1", "cost": 20},                 # Tangga Utara skips 2A
-    "02006": {"up": "2A", "cost": 8},                 # open stairs by the void: half flight
-    "02007": {"up": "2A", "cost": 8},
-    "02008": {"up": "2A", "cost": 8},
+    "02001": {"up": "3", "down": "1", "cost": 8},   # Lift Barat: akses 1, 2, 3, 5, 7
+    "02002": {"up": "4", "down": "1", "cost": 8},   # Lift Timur: akses 1, 2, 4, 6, 7
+    "02003": {"up": "2A", "down": "1", "cost": 10},    # Tangga Barat: 1 <-> 2 <-> 2A <-> 3 (2A half flight unconfirmed)
+    "02005": {"up": "2A", "down": "1", "cost": 10},    # Tangga Timur, same as Barat
+    "02004": {"up": "3", "down": "1", "cost": 10},                 # Tangga Utara skips 2A
+    "02006": {"up": "2A", "cost": 10},                 # open stairs by the void: half flight
+    "02007": {"up": "2A", "cost": 10},
+    "02008": {"up": "2A", "cost": 10},
 }
 
 # Rooms the dot may walk into although rooms are closed (the whole library area).

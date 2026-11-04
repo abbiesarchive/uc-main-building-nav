@@ -19,11 +19,11 @@ SHARED = {"2": ["02003", "02005", "02006", "02007", "02008",
 # down to Lt. 2 (unconfirmed for the end stairs 02003 / 02005). Each one matches the
 # "up" entry in lantai2.py.
 LINKS = {
-    "02003": {"up": "3", "down": "2", "cost": 8},   # Tangga Barat goes on to Lt. 3
-    "02005": {"up": "3", "down": "2", "cost": 8},   # Tangga Timur goes on to Lt. 3
-    "02006": {"down": "2", "cost": 8},
-    "02007": {"down": "2", "cost": 8},
-    "02008": {"down": "2", "cost": 8},
+    "02003": {"up": "3", "down": "2", "cost": 10},   # Tangga Barat goes on to Lt. 3
+    "02005": {"up": "3", "down": "2", "cost": 10},   # Tangga Timur goes on to Lt. 3
+    "02006": {"down": "2", "cost": 10},
+    "02007": {"down": "2", "cost": 10},
+    "02008": {"down": "2", "cost": 10},
 }
 
 # Rooms are closed: you can only stand in corridors, open lobbies, stairs and lifts.

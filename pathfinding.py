@@ -23,8 +23,8 @@ from floors import get_floor, load_all
 from map_data import LINK_TYPES, load_rooms, walkable_area
 
 MOVES = [(0, 1), (0, -1), (1, 0), (-1, 0)]    # W, S, D, A
-LINK_ROOM_STEP_COST = 3     # stepping into a stair/lift you do not use costs more, so routes do not cut through them
-GOAL_REACH = 1.0            # a closed room is reached when you stand within 1 m of its wall (doors are not modeled)
+LINK_ROOM_STEP_COST = 3    
+GOAL_REACH = 1.0            
 
 
 def get_all_rooms():
@@ -34,7 +34,6 @@ def get_all_rooms():
         for r in load_rooms(f):
             all_rooms.append({**r, "floor": f})
     return all_rooms
-
 
 def get_room_center(room):
     c = room["polygon"].centroid
@@ -46,11 +45,11 @@ def going_up(current_floor, target_floor):
     return get_floor(target_floor).LEVEL > get_floor(current_floor).LEVEL
 
 
-def _cells_in(geometry):
+def _cells_in(geometry):    
     """Whole-meter cells (x, y) covered by a shapely geometry."""
     xmin, ymin, xmax, ymax = geometry.bounds
     xs, ys = np.meshgrid(np.arange(math.floor(xmin), math.ceil(xmax) + 1),
-                         np.arange(math.floor(ymin), math.ceil(ymax) + 1))
+                        np.arange(math.floor(ymin), math.ceil(ymax) + 1))
     xs, ys = xs.ravel(), ys.ravel()
     inside = shapely.covers(geometry, shapely.points(xs, ys))
     return {(int(x), int(y)) for x, y in zip(xs[inside], ys[inside])}
@@ -69,7 +68,7 @@ def _walkable_cells(floor, db_revision):
 def link_cells(floor):
     return _link_cells(floor, revision())
 
-
+# ini untuk tau koordinat mana saja yang termasuk lift/tangga
 @lru_cache
 def _link_cells(floor, db_revision):
     """{cell: [stair/lift room, ...]} for every stair and lift on the floor."""
@@ -117,7 +116,7 @@ def astar(start_floor, start, target_room):
         dx = max(txmin - x, 0, x - txmax)
         dy = max(tymin - y, 0, y - tymax)
         walk = max(dx + dy - 1.5, 0)                # x, y only change by walking, on any floor
-        return max(walk, floor_cost(floor, target_floor))   # never None: such moves are not pushed
+        return max(walk, floor_cost(floor, target_floor))   # never None such moves are not pushed
 
     start_node = (start_floor, round(start[0]), round(start[1]))
     if floor_cost(start_floor, target_floor) is None:

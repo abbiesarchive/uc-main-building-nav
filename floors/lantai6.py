@@ -25,11 +25,11 @@ PART_OF = {}
 # Terhubung ke Lantai 7 (atas) dan Lantai 5 (bawah)
 LINKS = {
     "06001": {},  # Lift Barat
-    "06002": {"up": "7", "down": "4", "cost": 10},  # Lift Timur
-    "06003": {"up": "7", "down": "5", "cost": 8},   # Tangga Barat
-    "06004": {"up": "7", "down": "5", "cost": 8},   # Tangga Utara
-    "06005": {"up": "7", "down": "5", "cost": 8},   # Tangga Timur
-    "06006": {"down": "5", "cost": 8},   # Tangga Selatan (not on the Lt. 7 plan)
+    "06002": {"up": "7", "down": "4", "cost": 8},  # Lift Timur
+    "06003": {"up": "7", "down": "5", "cost": 10},   # Tangga Barat
+    "06004": {"up": "7", "down": "5", "cost": 10},   # Tangga Utara
+    "06005": {"up": "7", "down": "5", "cost": 10},   # Tangga Timur
+    "06006": {"down": "5", "cost": 10},   # Tangga Selatan (not on the Lt. 7 plan)
 }
 
 # Only for the overlay check on the plan image (plot_floor.py ... overlay).
