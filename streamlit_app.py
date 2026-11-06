@@ -14,6 +14,7 @@ from movement import Navigator
 from pathfinding import get_all_rooms, find_route, get_current_instruction
 
 MAX_LINES = 10
+MAX_STEP = 5
 TRAIL_WIDTH = 2.2  # Lebar 2.2m (radius 1.1m) agar langkah di grid 1m koridor menyentuh dinding ruangan
 
 KEYS_JS = """
@@ -102,7 +103,6 @@ def get_floor_canvas(nav):
         ax.add_patch(buffer_patch)
 
         # LineString untuk jejak langkah (Trail) dan rute navigasi A*
-        (trail_plot,) = ax.plot([], [], color="#e63946", linewidth=2.5, zorder=5, linestyle="--", alpha=0.85, label="Trail")
         (route_plot,) = ax.plot([], [], color="#0077b6", linewidth=4.0, zorder=6, linestyle="-", label="Rute")
         (goal_plot,) = ax.plot([], [], "s", color="#ffb703", markersize=10, markeredgecolor="#000", zorder=7)
         (dot_plot,) = ax.plot([], [], "o", color="#d00000", markersize=11, markeredgecolor="white", zorder=8)
@@ -113,7 +113,6 @@ def get_floor_canvas(nav):
             "ax": ax,
             "patches": patches,
             "buffer_patch": buffer_patch,
-            "trail_plot": trail_plot,
             "route_plot": route_plot,
             "goal_plot": goal_plot,
             "dot_plot": dot_plot,
@@ -138,13 +137,6 @@ def draw_fast(nav, near, route_line=None):
             patches[room_id].set_edgecolor("#d00000")
             patches[room_id].set_linewidth(2.2)
     canvas["highlighted"] = new_highlighted
-
-    # Update garis Trail (jejak langkah yang sudah dilewati)
-    if len(nav.trail) > 1:
-        tx, ty = zip(*nav.trail)
-        canvas["trail_plot"].set_data(tx, ty)
-    else:
-        canvas["trail_plot"].set_data([], [])
 
     # Update garis rute A*
     if route_line and len(route_line.coords) > 1:
@@ -176,88 +168,90 @@ def press(action, *args):
     elif action == "reset":
         st.session_state.nav = Navigator()
         st.session_state.message = ""
-        st.session_state.target_room = None
-        st.session_state.selected_room_label = None
-        st.session_state.search_ver = st.session_state.get("search_ver", 0) + 1
+        clear_target()
 
 
 st.set_page_config(page_title="UC Main Building navigation", layout="wide")
+st.markdown(
+    """
+    <style>
+    .block-container {padding-top: 4rem; padding-bottom: 1rem; max-width: 1500px;}
+    h1 {font-size: 1.5rem !important; line-height: 1.4 !important; padding: 0 0 .25rem 0 !important;}
+    div[data-testid="stVerticalBlock"] {gap: .6rem;}
+    div[data-testid="stButton"] button {padding: .2rem .5rem; min-height: 2.2rem;}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 st.title("Campus Indoor Navigation")
 components.html(KEYS_JS, height=1)
+
+
+def clear_target():
+    st.session_state.target_room = None
+    st.session_state.selected_room_label = None
+    st.session_state.search_ver = st.session_state.get("search_ver", 0) + 1
 
 
 @st.fragment
 def navigation_view():
     nav = get_nav()
-    near = nav.nearby()
 
     here_top = nav.here()
     here_label = f"{here_top['name']} (Lt. {nav.floor})" if here_top else f"Corridor / Lobby (Lt. {nav.floor})"
-    st.markdown(f"**You are in:** {here_label}")
 
     all_rooms = get_cached_all_rooms(revision())
     room_dict = {f"{r['room_id']} - {r['name']} (Lt. {r['floor']})": r for r in all_rooms}
-    default_placeholder = "-- Search lokasi tujuan --"
-    room_options = [default_placeholder] + sorted(room_dict.keys())
-
+    room_options = ["-- Search lokasi tujuan --"] + sorted(room_dict.keys())
     search_ver = st.session_state.get("search_ver", 0)
 
-    col_search, col_btn = st.columns([4, 1])
+    # ---- top bar: search + clear ----
+    col_search, col_btn = st.columns([5, 1], vertical_alignment="bottom")
     with col_search:
         curr_label = st.session_state.get("selected_room_label")
         selected_idx = room_options.index(curr_label) if curr_label in room_options else 0
-
         selected_label = st.selectbox(
-            "Search lokasi tujuan",
-            options=room_options,
-            index=selected_idx,
-            key=f"search_room_select_{search_ver}"
+            "Tujuan", options=room_options, index=selected_idx,
+            key=f"search_room_select_{search_ver}", label_visibility="collapsed",
         )
-
         if selected_label in room_dict:
             st.session_state.target_room = room_dict[selected_label]
             st.session_state.selected_room_label = selected_label
-            target_summary = f"{st.session_state.target_room['name']} (Lt. {st.session_state.target_room['floor']})"
         else:
             st.session_state.target_room = None
             st.session_state.selected_room_label = None
-            target_summary = ""
-
-
     with col_btn:
-        st.write("")
-        st.write("")
         if st.button("Hapus Rute", use_container_width=True):
-            st.session_state.target_room = None
-            st.session_state.selected_room_label = None
-            st.session_state.search_ver = search_ver + 1
+            clear_target()
             st.rerun()
 
-    # "from -> to" row: only when a destination is picked and you are not there yet. Teleport sits on its left.
     target = st.session_state.target_room
     here_now = nav.here()
-    if target and not (here_now and here_now["room_id"] == target["room_id"]):
+    arrived = bool(target and here_now and here_now["room_id"] == target["room_id"])
+
+    if target and not arrived:
+        target_summary = f"{target['name']} (Lt. {target['floor']})"
         col_route, col_tp = st.columns([5, 1], vertical_alignment="center")
         col_route.markdown(f"**{here_label} → {target_summary}**")
         if col_tp.button("Teleport", use_container_width=True):
             st.session_state.message = nav.teleport_to_room(target)
             st.rerun()
+    else:
+        st.markdown(f"**Posisi:** {here_label}")
 
     near = nav.nearby()
-
     route_line, current_instruction = None, ""
-    if st.session_state.target_room:
-        route_line, _, _ = find_route(nav.floor, (nav.x, nav.y), st.session_state.target_room)
-        current_instruction = get_current_instruction(nav.floor, (nav.x, nav.y), st.session_state.target_room)
+    if target:
+        route_line, _, _ = find_route(nav.floor, (nav.x, nav.y), target)
+        current_instruction = get_current_instruction(nav.floor, (nav.x, nav.y), target)
 
-    col_map, col_info = st.columns([2.3, 1])
+    col_map, col_info = st.columns([2.6, 1])
 
     with col_map:
-        st.subheader(f"Denah Lantai {nav.floor}")
         if current_instruction:
             st.info(f"**{current_instruction}**")
         st.pyplot(draw_fast(nav, near, route_line), clear_figure=False)
-        st.caption("Keyboard: WASD/panah untuk jalan, E naik lantai, Q turun lantai.")
+        st.caption("Keyboard: WASD / panah = jalan · E = naik lantai · Q = turun lantai")
 
     with col_info:
         if nav.link_hint():
@@ -265,48 +259,54 @@ def navigation_view():
         if st.session_state.message:
             st.warning(st.session_state.message)
 
-        step_val = st.number_input("Jarak jalan per klik (meter):", min_value=1, max_value=20, value=nav.step, step=1)
-        nav.set_step(step_val)
+        with st.container(border=True):
+            # Fixed key and no value= : the widget owns its value. (value=nav.step changed on every
+            # rerun, so Streamlit saw a "new" widget and reset it while you spammed +/-.)
+            st.session_state.setdefault("step_input", min(nav.step, MAX_STEP))
+            step_val = st.number_input("Langkah per klik (m)", min_value=1, max_value=MAX_STEP, step=1, key="step_input")
+            nav.set_step(step_val)
 
-        st.write(f"**Walk ({nav.step} m per click)**")
-        _, up, _ = st.columns(3)
-        left, down, right = st.columns(3)
-        up.button("W", on_click=press, args=("move", 0, 1), use_container_width=True)
-        left.button("A", on_click=press, args=("move", -1, 0), use_container_width=True)
-        down.button("S", on_click=press, args=("move", 0, -1), use_container_width=True)
-        right.button("D", on_click=press, args=("move", 1, 0), use_container_width=True)
+            _, up, _ = st.columns(3)
+            left, down, right = st.columns(3)
+            up.button("W", on_click=press, args=("move", 0, 1), use_container_width=True)
+            left.button("A", on_click=press, args=("move", -1, 0), use_container_width=True)
+            down.button("S", on_click=press, args=("move", 0, -1), use_container_width=True)
+            right.button("D", on_click=press, args=("move", 1, 0), use_container_width=True)
 
-        st.write("**Stair / lift**")
-        e, q = st.columns(2)
-        e.button("E up", on_click=press, args=("floor", True), use_container_width=True)
-        q.button("Q down", on_click=press, args=("floor", False), use_container_width=True)
+            e, q = st.columns(2)
+            e.button("E up", on_click=press, args=("floor", True), use_container_width=True)
+            q.button("Q down", on_click=press, args=("floor", False), use_container_width=True)
 
-        st.markdown("---")
-        st.markdown("**Informasi & Aturan Lift**")
-        st.markdown("- **Lift Barat:** Hanya melayani lantai 1, 2, 3, 5, 7")
-        st.markdown("- **Lift Timur:** Hanya melayani lantai 1, 2, 4, 6, 7")
-        st.markdown("**Tanda pada Peta**")
-        st.markdown("- **Titik Merah (di dalam):** Posisi Anda saat ini")
-        st.markdown("- **Garis Putus-Putus Merah:** Jejak langkah (*trail*) yang telah Anda lewati")
-        st.markdown("- **Lingkaran Biru (Transparan):** Radius *buffer* / jangkauan deteksi ruangan di sekitar Anda")
-        st.markdown("- **Garis Biru & Kotak Kuning:** Jalur rute navigasi menuju titik tujuan aktif")
-        st.markdown("- **Ruangan Bergaris Tepi Merah:** Ruangan yang berada di dalam jangkauan radius *buffer* Anda saat ini")
+        with st.container(border=True):
+            st.markdown(f"**Radius buffer: {nav.radius} m**")
+            minus, plus, reset = st.columns(3)
+            minus.button("−", on_click=press, args=("radius", -1), use_container_width=True)
+            plus.button("+", on_click=press, args=("radius", +1), use_container_width=True)
+            reset.button("Restart", on_click=press, args=("reset",), use_container_width=True)
 
-        st.markdown("---")
-        st.write(f"**Buffer radius: {nav.radius} m**")
-        minus, plus, reset = st.columns(3)
-        minus.button("Kurangi (-)", on_click=press, args=("radius", -1), use_container_width=True)
-        plus.button("Tambah (+)", on_click=press, args=("radius", +1), use_container_width=True)
-        reset.button("Restart", on_click=press, args=("reset",), use_container_width=True)
+            st.markdown(f"**Ruangan di sekitar ({len(near)})**")
+            if near:
+                st.code("\n".join(
+                    f"{'inside' if dist == 0 else f'{dist:.1f} m':>7}  {room['room_id']}  {room['name']}"
+                    for room, dist in near[:MAX_LINES]
+                ) + (f"\n... dan {len(near) - MAX_LINES} lainnya" if len(near) > MAX_LINES else ""),
+                    language=None)
+            else:
+                st.caption("Tidak ada.")
 
-        st.write(f"**Rooms in buffer ({len(near)}):**")
-        st.text("\n".join(
-            f"{'inside' if dist == 0 else f'{dist:.1f} m':>7}  {room['room_id']}  {room['name']}"
-            for room, dist in near[:MAX_LINES]
-        ) + (f"\n... and {len(near) - MAX_LINES} more" if len(near) - MAX_LINES > 0 else ""))
+            passed = [room["room_id"] for room in get_trail_rooms(nav)]
+            st.markdown(f"**Trail ({len(passed)}):** " + (", ".join(passed) if passed else "-"))
 
-        passed = [room["room_id"] for room in get_trail_rooms(nav)]
-        st.write(f"**Trail passed ({len(passed)}):** " + (", ".join(passed) if passed else "-"))
+        with st.expander("Legenda & info lift"):
+            st.markdown(
+                "- **Lift Barat:** lantai 1, 2, 3, 5, 7\n"
+                "- **Lift Timur:** lantai 1, 2, 4, 6, 7\n\n"
+                "- Titik merah: posisi Anda\n"
+                ""
+                "- Lingkaran biru: radius buffer\n"
+                "- Garis biru & kotak kuning: rute ke tujuan\n"
+                "- Ruangan bertepi merah: dalam radius buffer"
+            )
 
 
 navigation_view()

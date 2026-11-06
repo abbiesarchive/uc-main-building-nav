@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UC Indoor Navigation</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="/web/style.css">
+</head>
+<body>
+<div id="map"></div>
+
+<!-- search + directions -->
+<section id="search" class="card">
+  <div class="fields">
+    <div class="dots"><i class="dot-from"></i><i class="dot-line"></i><i class="dot-to"></i></div>
+    <div class="inputs">
+      <div class="field"><input id="from" placeholder="My location" autocomplete="off" aria-label="From"><button class="x" data-clear="from" hidden aria-label="Clear">×</button></div>
+      <div class="field"><input id="to" placeholder="Where to? (room, lab, toilet…)" autocomplete="off" aria-label="To"><button class="x" data-clear="to" hidden aria-label="Clear">×</button></div>
+    </div>
+  </div>
+  <ul id="suggest" hidden></ul>
+  <div id="directions" hidden>
+    <button id="sheet-handle" aria-label="Toggle directions"></button>
+    <div id="summary"></div>
+    <ol id="steps"></ol>
+  </div>
+</section>
+
+<!-- top-right -->
+<div id="topright"><button id="theme" class="fab" title="Dark mode" aria-label="Toggle dark mode">◐</button></div>
+
+<!-- floor pill -->
+<nav id="floors" class="pill" aria-label="Floors"></nav>
+
+<!-- bottom-right: scale + legend -->
+<div id="bottomright">
+  <div id="scale"></div>
+  <div id="legend" class="chip"></div>
+</div>
+
+<!-- controls -->
+<section id="controls" class="card">
+  <div id="status"></div>
+  <div class="row">
+    <div class="dpad">
+      <span></span><button data-move="0,1" aria-label="North">▲</button><span></span>
+      <button data-move="-1,0" aria-label="West">◀</button><button data-move="0,-1" aria-label="South">▼</button><button data-move="1,0" aria-label="East">▶</button>
+    </div>
+    <div class="side">
+      <form id="goto"><input id="gx" placeholder="x, y" inputmode="decimal" aria-label="Go to coordinate"><button>Go</button></form>
+      <button id="up" class="floorbtn" hidden></button>
+      <button id="down" class="floorbtn" hidden></button>
+    </div>
+  </div>
+  <details id="settings">
+    <summary>Settings</summary>
+    <label>Step <b id="stepv">1</b> m<input id="step" type="range" min="1" max="10" value="1"></label>
+    <label>Buffer radius <b id="radv">5</b> m<input id="radius" type="range" min="1" max="15" value="5"></label>
+  </details>
+  <div id="msg" hidden></div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="/web/app.js"></script>
+</body>
+</html>

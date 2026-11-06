@@ -113,7 +113,10 @@ class Navigator:
         poly = target_room["polygon"]
         cx, cy = round(poly.centroid.x), round(poly.centroid.y)
 
-        if is_walkable(target_floor, cx, cy):
+        fixed = self.settings[target_floor].TELEPORT.get(target_room["room_id"])
+        if fixed and is_walkable(target_floor, *fixed):
+            tx, ty = fixed                      # hand-picked spot (see TELEPORT in floors/lantaiN.py)
+        elif is_walkable(target_floor, cx, cy):
             tx, ty = cx, cy
         else:
             # Cari titik walkable terdekat pada grid 1 m agar tidak terjebak di ruang tertutup
