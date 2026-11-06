@@ -8,6 +8,7 @@ The user is (floor, x, y). Each step the app asks this file:
 
 Floors come from the files in floors/, so nothing here is specific to one floor.
 """
+import math
 from shapely.geometry import LineString, Point
 
 from floors import load_all
@@ -19,7 +20,7 @@ MIN_RADIUS, MAX_RADIUS = 1, 15
 
 
 class Navigator:
-    def __init__(self, floor=None, radius=5):
+    def __init__(self, floor=None, radius=5, step=STEP):
         self.settings = load_all()
         self.floors = {}
         for name in self.settings:
@@ -28,6 +29,7 @@ class Navigator:
         floor = floor or next(iter(self.settings))      # lowest floor by default
         self.start = (floor, *self.settings[floor].START)
         self.radius = radius
+        self.step = step
         self.reset()
 
     def reset(self):
@@ -39,13 +41,23 @@ class Navigator:
         return self.floors[self.floor]["rooms"]
 
     # ---- moving -----------------------------------------------------------
+    def set_step(self, step):
+        """Set how many meters one click walks."""
+        self.step = max(1, int(step))
+
     def move(self, dx, dy):
-        """Step one meter. Returns a message, or "" when the step worked."""
-        nx, ny = self.x + dx * STEP, self.y + dy * STEP
-        if not is_walkable(self.floor, nx, ny):
-            return "Blocked: that is a closed room, the void or outside the building."
-        self.x, self.y = nx, ny
-        self.trail.append((nx, ny))
+        """Walk self.step meters, checking every 1 m so the dot cannot jump through a wall.
+        Returns a message, or "" when the whole step worked."""
+        moved = 0
+        for _ in range(self.step):
+            nx, ny = self.x + dx, self.y + dy
+            if not is_walkable(self.floor, nx, ny):
+                if moved == 0:
+                    return "Blocked: that is a closed room, the void or outside the building."
+                return f"Blocked after {moved} m (stopped before the obstacle)."
+            self.x, self.y = nx, ny
+            self.trail.append((nx, ny))
+            moved += 1
         return ""
 
     def link(self):

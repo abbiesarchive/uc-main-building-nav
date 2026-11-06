@@ -1,7 +1,6 @@
 """Walk through the building in the browser.
 Run: streamlit run streamlit_app.py
 """
-import math
 import matplotlib.pyplot as plt
 import streamlit as st
 from matplotlib.patches import Polygon as MplPolygon
@@ -9,10 +8,10 @@ from shapely.geometry import LineString, Point
 import streamlit.components.v1 as components
 
 from gis_ops import rooms_along_route, spatial_join
-from map_data import is_walkable
+from database import revision
 from map_view import draw_floor
 from movement import Navigator
-from pathfinding import get_all_rooms, find_route, get_current_instruction, walkable_cells
+from pathfinding import get_all_rooms, find_route, get_current_instruction
 
 MAX_LINES = 10
 TRAIL_WIDTH = 2.2  # Lebar 2.2m (radius 1.1m) agar langkah di grid 1m koridor menyentuh dinding ruangan
@@ -46,16 +45,24 @@ if (!window.parent._ucKeys) {
 
 
 def get_nav():
-    """One Navigator per browser session."""
+    """One Navigator per browser session. Rebuilt (same position) when rooms in the database changed."""
+    rev = revision()
     if "nav" not in st.session_state:
         st.session_state.nav = Navigator()
         st.session_state.message = ""
+        st.session_state.nav_revision = rev
+    elif st.session_state.get("nav_revision") != rev or not hasattr(st.session_state.nav, "step"):
+        old = st.session_state.nav            # also catches a Navigator made by older code
+        new = Navigator(floor=old.floor, radius=old.radius, step=getattr(old, "step", 1))
+        new.x, new.y, new.trail = old.x, old.y, old.trail
+        st.session_state.nav = new
+        st.session_state.nav_revision = rev
     return st.session_state.nav
 
 
 @st.cache_resource
-def get_cached_all_rooms():
-    """Cache daftar seluruh ruangan agar tidak query SQLite berulang kali."""
+def get_cached_all_rooms(db_revision):
+    """Cache daftar seluruh ruangan; dibaca ulang hanya kalau database berubah."""
     return get_all_rooms()
 
 
@@ -73,7 +80,13 @@ def get_trail_rooms(nav):
 
 def get_floor_canvas(nav):
     """Simpan gambar dasar lantai (ruangan, teks, void) di memori."""
-    cache = st.session_state.setdefault("floor_canvas_cache", {})
+    rev = revision()
+    if st.session_state.get("floor_canvas_rev") != rev:     # database changed: drop old drawings
+        for old in st.session_state.get("floor_canvas_cache", {}).values():
+            plt.close(old["fig"])
+        st.session_state.floor_canvas_cache = {}
+        st.session_state.floor_canvas_rev = rev
+    cache = st.session_state.floor_canvas_cache
     floor = nav.floor
 
     if floor not in cache:
@@ -151,32 +164,6 @@ def draw_fast(nav, near, route_line=None):
     return canvas["fig"]
 
 
-def do_teleport(nav, target_room):
-    """Pindahkan posisi user ke ruangan tujuan dengan aman."""
-    target_floor = str(target_room["floor"])
-    if target_floor not in nav.floors:
-        return f"Lt. {target_floor} belum dipetakan."
-
-    poly = target_room["polygon"]
-    cx, cy = round(poly.centroid.x), round(poly.centroid.y)
-
-    if is_walkable(target_floor, cx, cy):
-        tx, ty = cx, cy
-    else:
-        cells = walkable_cells(target_floor)
-        if not cells:
-            return f"Tidak ada area walkable di Lt. {target_floor}."
-        tx, ty = min(
-            cells,
-            key=lambda c: (poly.distance(Point(c)), math.hypot(c[0] - cx, c[1] - cy))
-        )
-
-    nav.floor = target_floor
-    nav.x, nav.y = tx, ty
-    nav.trail = [(nav.x, nav.y)]
-    return f"Teleport berhasil ke {target_room['name']} (Lt. {target_floor})."
-
-
 def press(action, *args):
     nav = st.session_state.nav
     if action == "move":
@@ -208,7 +195,7 @@ def navigation_view():
     here_label = f"{here_top['name']} (Lt. {nav.floor})" if here_top else f"Corridor / Lobby (Lt. {nav.floor})"
     st.markdown(f"**You are in:** {here_label}")
 
-    all_rooms = get_cached_all_rooms()
+    all_rooms = get_cached_all_rooms(revision())
     room_dict = {f"{r['room_id']} - {r['name']} (Lt. {r['floor']})": r for r in all_rooms}
     default_placeholder = "-- Search lokasi tujuan --"
     room_options = [default_placeholder] + sorted(room_dict.keys())
@@ -234,9 +221,8 @@ def navigation_view():
         else:
             st.session_state.target_room = None
             st.session_state.selected_room_label = None
-            target_summary = "Belum dipilih"
+            target_summary = ""
 
-        st.markdown(f"**{here_label} → {target_summary}**")
 
     with col_btn:
         st.write("")
@@ -247,14 +233,15 @@ def navigation_view():
             st.session_state.search_ver = search_ver + 1
             st.rerun()
 
-        if st.button(
-            "Teleport",
-            disabled=(st.session_state.target_room is None),
-            use_container_width=True
-        ):
-            if st.session_state.target_room is not None:
-                st.session_state.message = do_teleport(nav, st.session_state.target_room)
-                st.rerun()
+    # "from -> to" row: only when a destination is picked and you are not there yet. Teleport sits on its left.
+    target = st.session_state.target_room
+    here_now = nav.here()
+    if target and not (here_now and here_now["room_id"] == target["room_id"]):
+        col_route, col_tp = st.columns([5, 1], vertical_alignment="center")
+        col_route.markdown(f"**{here_label} → {target_summary}**")
+        if col_tp.button("Teleport", use_container_width=True):
+            st.session_state.message = nav.teleport_to_room(target)
+            st.rerun()
 
     near = nav.nearby()
 
@@ -273,14 +260,15 @@ def navigation_view():
         st.caption("Keyboard: WASD/panah untuk jalan, E naik lantai, Q turun lantai.")
 
     with col_info:
-        here = nav.here()
-        st.write(f"**You are in:** {here['name'] + ' (' + here['type'] + ')' if here else 'corridor / lobby'}")
         if nav.link_hint():
             st.info(nav.link_hint())
         if st.session_state.message:
             st.warning(st.session_state.message)
 
-        st.write("**Walk (1 m per click)**")
+        step_val = st.number_input("Jarak jalan per klik (meter):", min_value=1, max_value=20, value=nav.step, step=1)
+        nav.set_step(step_val)
+
+        st.write(f"**Walk ({nav.step} m per click)**")
         _, up, _ = st.columns(3)
         left, down, right = st.columns(3)
         up.button("W", on_click=press, args=("move", 0, 1), use_container_width=True)
