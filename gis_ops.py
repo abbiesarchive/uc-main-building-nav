@@ -19,8 +19,8 @@ def rooms_in_buffer(rooms, x, y, radius):
     return spatial_join(rooms, buffer_around(x, y, radius))
 
 
-def rooms_along_route(rooms, route_line, width=1.0):
+def rooms_along_route(rooms, route_line, width=2.2):
     """Rooms the route passes through, in order from the start.
-    A small buffer around the line stands for the width of a person."""
+    width=2.2 m (radius 1.1 m) so walking on the 1 m corridor grid touches adjacent room walls."""
     hits = spatial_join(rooms, route_line.buffer(width / 2))
     return sorted(hits, key=lambda r: route_line.project(r["polygon"].centroid))

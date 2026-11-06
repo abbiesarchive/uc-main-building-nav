@@ -92,6 +92,33 @@ class Navigator:
         self.trail = [(self.x, self.y)]
         return f"You took {room['name']} to Lt. {target}."
 
+    def teleport_to_room(self, target_room):
+        """Teleport user to target room (or nearest walkable spot next to it)."""
+        target_floor = str(target_room["floor"])
+        if target_floor not in self.floors:
+            return f"Lt. {target_floor} belum dipetakan."
+
+        poly = target_room["polygon"]
+        cx, cy = round(poly.centroid.x), round(poly.centroid.y)
+
+        if is_walkable(target_floor, cx, cy):
+            tx, ty = cx, cy
+        else:
+            # Cari titik walkable terdekat pada grid 1 m agar tidak terjebak di ruang tertutup
+            from pathfinding import walkable_cells
+            cells = walkable_cells(target_floor)
+            if not cells:
+                return f"Tidak ada area walkable di Lt. {target_floor}."
+            tx, ty = min(
+                cells,
+                key=lambda c: (poly.distance(Point(c)), math.hypot(c[0] - cx, c[1] - cy))
+            )
+
+        self.floor = target_floor
+        self.x, self.y = tx, ty
+        self.trail = [(self.x, self.y)]
+        return f"Teleport berhasil ke {target_room['name']} (Lt. {target_floor})."
+    
     def link_hint(self):
         """Text that tells the user where the stair or lift they stand in goes."""
         room, links = self.link()
