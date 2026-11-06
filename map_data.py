@@ -102,16 +102,21 @@ def walkable_area(floor):
 def _walkable_area(floor, db_revision):
     """Where the dot can stand: the outline minus the voids. Unless a floor sets
     ROOMS_WALKABLE = True, also minus every room except stairs, lifts, Lounges and
-    the rooms listed in OPEN_ROOMS. Each blocked room is grown by 1 cm so its wall
+    the rooms listed in OPEN_ROOMS. A stair or lift with no LINKS entry (it does not serve this
+    floor) is always blocked. Each blocked room is grown by 1 cm so its wall
     line is blocked too (otherwise the dot could walk along the wall)."""
     settings = get_floor(floor)
     area = building(floor)
     for void in voids(floor):
         area = area.difference(void)
-    if not settings.ROOMS_WALKABLE:
-        for room in load_rooms(floor):
-            if room["type"] not in LINK_TYPES and room["type"] != "Lounge" and room["room_id"] not in settings.OPEN_ROOMS:
-                area = area.difference(room["polygon"].buffer(0.01, join_style="mitre"))
+    for room in load_rooms(floor):
+        if room["type"] in LINK_TYPES:
+            blocked = not settings.LINKS.get(room["room_id"])      # lift/stairs that do not serve this floor
+        else:
+            blocked = (not settings.ROOMS_WALKABLE and room["type"] != "Lounge"
+                       and room["room_id"] not in settings.OPEN_ROOMS)
+        if blocked:
+            area = area.difference(room["polygon"].buffer(0.01, join_style="mitre"))
     return area
 
 

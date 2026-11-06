@@ -20,7 +20,7 @@ from shapely.geometry import LineString, Point
 
 from database import revision
 from floors import get_floor, load_all
-from map_data import LINK_TYPES, load_rooms, walkable_area
+from map_data import LINK_TYPES, is_walkable, load_rooms, walkable_area
 
 MOVES = [(0, 1), (0, -1), (1, 0), (-1, 0)]    # W, S, D, A
 LINK_ROOM_STEP_COST = 3     # stepping into a stair/lift you do not use costs more, so routes do not cut through them
@@ -208,8 +208,11 @@ def plan(current_floor, start_pos, target_room):
         points = [tuple(start_pos)] + here
         return LineString(points if len(points) > 1 else points * 2), link, next_floor, floors
 
-    points = [tuple(start_pos)] + here + [goal]
-    return LineString(points), None, None, floors
+    points = [tuple(start_pos)] + here
+    if is_walkable(target_room["floor"], round(goal[0]), round(goal[1])):
+        points.append(goal)             # open room: go to its centre
+    # closed room: the route and the yellow marker end where you can stand, next to its wall
+    return LineString(points if len(points) > 1 else points * 2), None, None, floors
 
 
 def find_route(current_floor, start_pos, target_room):
@@ -232,8 +235,9 @@ def get_current_instruction(current_floor, pos, target_room):
     line, link, next_floor, _ = plan(current_floor, pos, target_room)
 
     if link is None:
-        if line.length < 1.5:
-            return f"🎉 Anda telah sampai di ruangan {target_room['name']}!"
+        # arrived: close to the room's centre, or within reach of its wall (the same rule the route search ends on)
+        if line.length < 1.5 or target_room["polygon"].distance(Point(pos)) <= GOAL_REACH + 0.01:
+            return f"Anda telah sampai di ruangan {target_room['name']}!"
         goal_name = f"ruangan {target_room['name']}"
         arah_text = ""
     else:

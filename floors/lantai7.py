@@ -32,6 +32,9 @@ IMAGE = "denah/lantai7.jpeg"
 # Kalibrasi gambar (sementara mengikuti sistem koordinat yang sama).
 CALIBRATION = (80, 175)
 
+# Rooms the dot may walk into although rooms are closed: the Dian Auditorium.
+OPEN_ROOMS = ["711"]
+
 # Teleport spot for a room when the automatic one is wrong: room_id -> (x, y), must be walkable.
 # Dian Auditorium: stand in the corridor on its left side, outside (not at the stairs on its right).
 TELEPORT = {"711": (74, 46)}

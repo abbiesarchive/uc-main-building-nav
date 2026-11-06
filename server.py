@@ -207,8 +207,10 @@ def api_route():
             floor = run[0][0]
             last = i == len(runs) - 1
             pts = [[x, y] for _, x, y in run]
+            if last and is_walkable(floor, round(goal[0]), round(goal[1])):
+                pts.append(list(goal))          # open room: end at its centre; closed room: end at the wall
             if last:
-                pts.append(list(goal))
+                dest["point"] = pts[-1]
             segments.append({"floor": floor, "points": pts})
             walked = floor_steps(floor, run, last, name)
             steps += walked

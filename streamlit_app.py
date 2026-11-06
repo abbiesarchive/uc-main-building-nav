@@ -11,10 +11,11 @@ from gis_ops import rooms_along_route, spatial_join
 from database import revision
 from map_view import draw_floor
 from movement import Navigator
-from pathfinding import get_all_rooms, find_route, get_current_instruction
+from pathfinding import GOAL_REACH, get_all_rooms, find_route, get_current_instruction
 
 MAX_LINES = 10
 MAX_STEP = 5
+MAX_TRAIL = 5
 TRAIL_WIDTH = 2.2  # Lebar 2.2m (radius 1.1m) agar langkah di grid 1m koridor menyentuh dinding ruangan
 
 KEYS_JS = """
@@ -156,6 +157,22 @@ def draw_fast(nav, near, route_line=None):
     return canvas["fig"]
 
 
+def is_arrived(nav, target, near):
+    """Double check. Arrived if ANY of these is true (target must be on this floor):
+    1. the room is inside the buffer (same list as "Ruangan di sekitar"),
+    2. you stand inside the room (the original rule),
+    3. you are within 1 m of its wall, or within 1.5 m of its centre (the route search's own rule)."""
+    if not target or str(target["floor"]) != nav.floor:
+        return False
+    here = nav.here()
+    point = Point(nav.x, nav.y)
+    poly = target["polygon"]
+    return (any(room["room_id"] == target["room_id"] for room, _ in near)
+            or bool(here and here["room_id"] == target["room_id"])
+            or poly.distance(point) <= GOAL_REACH + 0.01
+            or poly.centroid.distance(point) < 1.5)
+
+
 def press(action, *args):
     nav = st.session_state.nav
     if action == "move":
@@ -179,6 +196,7 @@ st.markdown(
     h1 {font-size: 1.5rem !important; line-height: 1.4 !important; padding: 0 0 .25rem 0 !important;}
     div[data-testid="stVerticalBlock"] {gap: .6rem;}
     div[data-testid="stButton"] button {padding: .2rem .5rem; min-height: 2.2rem;}
+    .st-key-teleport_btn button {min-height: 1.7rem; padding: .05rem .6rem; font-size: .85rem;}
     </style>
     """,
     unsafe_allow_html=True,
@@ -226,29 +244,32 @@ def navigation_view():
             st.rerun()
 
     target = st.session_state.target_room
-    here_now = nav.here()
-    arrived = bool(target and here_now and here_now["room_id"] == target["room_id"])
+    near = nav.nearby()
+    arrived = is_arrived(nav, target, near)
 
     if target and not arrived:
         target_summary = f"{target['name']} (Lt. {target['floor']})"
-        col_route, col_tp = st.columns([5, 1], vertical_alignment="center")
-        col_route.markdown(f"**{here_label} → {target_summary}**")
-        if col_tp.button("Teleport", use_container_width=True):
-            st.session_state.message = nav.teleport_to_room(target)
-            st.rerun()
+        with st.container(horizontal=True, vertical_alignment="center"):
+            st.markdown(f"**{here_label} → {target_summary}**")
+            if st.button("Teleport", icon=":material/near_me:", type="primary", width="content", key="teleport_btn"):
+                st.session_state.message = nav.teleport_to_room(target)
+                st.rerun()
     else:
         st.markdown(f"**Posisi:** {here_label}")
 
-    near = nav.nearby()
     route_line, current_instruction = None, ""
-    if target:
+    if arrived:
+        current_instruction = f"Anda telah sampai di ruangan {target['name']}!"
+    elif target:
         route_line, _, _ = find_route(nav.floor, (nav.x, nav.y), target)
         current_instruction = get_current_instruction(nav.floor, (nav.x, nav.y), target)
 
     col_map, col_info = st.columns([2.6, 1])
 
     with col_map:
-        if current_instruction:
+        if arrived:
+            st.success(f"**{current_instruction}**", icon=":material/check_circle:")
+        elif current_instruction:
             st.info(f"**{current_instruction}**")
         st.pyplot(draw_fast(nav, near, route_line), clear_figure=False)
         st.caption("Keyboard: WASD / panah = jalan · E = naik lantai · Q = turun lantai")
@@ -295,7 +316,9 @@ def navigation_view():
                 st.caption("Tidak ada.")
 
             passed = [room["room_id"] for room in get_trail_rooms(nav)]
-            st.markdown(f"**Trail ({len(passed)}):** " + (", ".join(passed) if passed else "-"))
+            shown = passed[-MAX_TRAIL:]                         # the most recent ones
+            more = f" (+{len(passed) - MAX_TRAIL} sebelumnya)" if len(passed) > MAX_TRAIL else ""
+            st.markdown(f"**Trail ({len(passed)}):** " + (", ".join(shown) + more if passed else "-"))
 
         with st.expander("Legenda & info lift"):
             st.markdown(

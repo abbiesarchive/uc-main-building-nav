@@ -2,13 +2,13 @@
   --accent: #3b6ef5; --accent-soft: #e6edff; --bg: #f3f4f6; --card: #ffffff; --text: #1d2433; --muted: #6b7385;
   --line: #e2e5ec; --shadow: 0 4px 18px rgba(20,30,60,.14); --floor: #fbfbf8; --wall: #8a90a0; --void: #d5d8de;
   --c-lab: #cfe6ea; --c-class: #d9e4f7; --c-office: #e4ecd2; --c-fnb: #fbe3c7; --c-service: #e7e2ee;
-  --c-library: #f7ecbd; --c-transit: #f4c9b4; --c-other: #e8e8e8; --near: #3b6ef5; --route: #3b6ef5;
+  --c-library: #f7ecbd; --c-transit: #f4c9b4; --c-other: #e8e8e8; --c-off: #d6d6d6; --near: #3b6ef5; --route: #3b6ef5;
 }
 [data-theme=dark] {
   --accent: #7ea1ff; --accent-soft: #26304d; --bg: #11151f; --card: #1c2230; --text: #e8ebf3; --muted: #98a1b6;
   --line: #2c3447; --shadow: 0 4px 18px rgba(0,0,0,.5); --floor: #232a3a; --wall: #5d667c; --void: #12161f;
   --c-lab: #2f4a50; --c-class: #2f3f5f; --c-office: #3a4a2e; --c-fnb: #5a4430; --c-service: #41394f;
-  --c-library: #55502a; --c-transit: #664636; --c-other: #333a48; --near: #7ea1ff; --route: #7ea1ff;
+  --c-library: #55502a; --c-transit: #664636; --c-other: #333a48; --c-off: #2a2f3b; --near: #7ea1ff; --route: #7ea1ff;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--text); }
@@ -91,7 +91,7 @@ path.room { stroke: var(--wall); stroke-width: .8; fill-opacity: 1; transition: 
 path.room:hover { stroke: var(--accent); stroke-width: 2; }
 .cat-lab { fill: var(--c-lab); } .cat-class { fill: var(--c-class); } .cat-office { fill: var(--c-office); }
 .cat-fnb { fill: var(--c-fnb); } .cat-service { fill: var(--c-service); } .cat-library { fill: var(--c-library); }
-.cat-transit { fill: var(--c-transit); } .cat-other { fill: var(--c-other); }
+.cat-transit { fill: var(--c-transit); } .cat-off { fill: var(--c-off); } .cat-other { fill: var(--c-other); }
 path.near { stroke: var(--near) !important; stroke-width: 2 !important; filter: brightness(1.06) saturate(1.4); }
 path.target { stroke: #e5484d !important; stroke-width: 3 !important; }
 path.route { stroke: var(--route); stroke-width: 6; fill: none; stroke-linecap: round; stroke-linejoin: round; }

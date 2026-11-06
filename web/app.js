@@ -40,7 +40,8 @@ function drawFloor(name) {
     labelMarker((v[0] + v[2]) / 2, (v[1] + v[3]) / 2, [v[2] - v[0], v[3] - v[1]], "VOID", "VOID", false, true);
   });
   F.rooms.forEach(r => {
-    const layer = L.rectangle(rect(r.bbox), { className: "room cat-" + catOf(r.type) }).addTo(layers.base);
+    const dead = (r.type === "Lift" || r.type === "Stairs") && !r.links.up && !r.links.down;   // lift that does not stop here
+    const layer = L.rectangle(rect(r.bbox), { className: "room cat-" + (dead ? "off" : catOf(r.type)) }).addTo(layers.base);
     roomLayers[r.id] = layer;
     layer.bindTooltip(() => roomInfo(r, name), { sticky: true, direction: "top", opacity: 1 });
     layer.bindPopup(() => popup(r, name), { closeButton: false });
@@ -49,8 +50,9 @@ function drawFloor(name) {
     let short, long;
     if (link) {
       const arrows = [r.links.up ? "↑" + r.links.up : "", r.links.down ? "↓" + r.links.down : ""].filter(Boolean);
-      short = arrows.join(" ") || (r.type === "Lift" ? "Lift" : "Stairs");
-      long = (r.type === "Lift" ? "Lift" : "Stairs") + "\n" + arrows.join(" ");
+      const kind = r.type === "Lift" ? "Lift" : "Stairs";
+      short = arrows.join(" ") || "✕ " + kind;
+      long = arrows.length ? kind + "\n" + arrows.join(" ") : "✕ " + kind + "\nnot served";
     } else { short = r.id; long = shortName(r.name); }
     labelMarker((r.bbox[0] + r.bbox[2]) / 2, (r.bbox[1] + r.bbox[3]) / 2, [w, h], short, long, link, LANDMARKS.includes(r.type));
   });
